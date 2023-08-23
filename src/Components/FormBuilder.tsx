@@ -3,17 +3,12 @@ import OneQForm from "./OneQForm";
 import CategoryFormBuilder from "./CategoryFormBuilder";
 
 const FormBuilder = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [categoryQuestion, setCategoryQuestion] = useState<object>({});
 
   const addCategoryQuestion = useCallback((question: object) => {
     setCategoryQuestion(question);
   }, []);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const submitForm = useCallback(() => {
-    const formData = new FormData();
-    formData.append("mcq", JSON.stringify(categoryQuestion));
-  }, [categoryQuestion]);
 
   return (
     <div className="w-full h-screen min-h-screen flex flex-col justify-start items-center">

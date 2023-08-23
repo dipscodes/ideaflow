@@ -17,10 +17,10 @@
 
 .item.insight {
   transition-delay: 0s;
-  height: 4rem;
+  height: 8rem;
   border-radius: 10px;
 }
 
 .item.outsight {
-  height: 0.75rem;
+  height: 2rem;
 }

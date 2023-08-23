@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AiOutlinePlusCircle } from "react-icons/ai";
-import { RxCrossCircled } from "react-icons/rx";
+import { HiOutlineLightBulb, HiOutlineDuplicate } from "react-icons/hi";
 import { MdOutlineDragIndicator } from "react-icons/md";
+import { RxCrossCircled } from "react-icons/rx";
 
 interface Props {
   className?: string;
@@ -10,8 +11,7 @@ interface Props {
 
 const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
   const [choices, setChoices] = useState<string[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [enter, setEnter] = useState<Boolean>(false);
+  const [autofocusIndex, setAutofocusIndex] = useState<number>(0);
   interface TProps {
     questionStatement: string | null;
     choices: string[];
@@ -100,48 +100,78 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
         index
       )
     );
-    console.log(choices, parseInt(e.dataTransfer.getData("index")), index);
     setToggle((prev) => (prev + 1) % 2);
   };
 
   const addOption = () => {
-    // const i = document.getElementById(
-    //   "category-question-ans-input"
-    // ) as HTMLInputElement;
-    // if (i.value === "") return;
     choices.push("");
+    setAutofocusIndex(choices.length - 1);
     setChoices(choices);
     setToggle((prev) => (prev + 1) % 2);
   };
 
-  const closeOption = (e: React.MouseEvent<SVGAElement>) => {
-    setChoices(
-      choices.filter(
-        (item) =>
-          item !==
-          (
-            (e.currentTarget as SVGAElement).parentNode as HTMLDivElement
-          ).querySelector("span")?.innerText
-      )
-    );
+  const searchOption = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchString = e.target.value;
+    choices.filter((idea) => idea.includes(searchString));
+    setQuestion(templateQuestion);
+  };
+
+  const changeIdea = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const inputElement = e.target;
+    choices[index] = `${inputElement.value}`;
+    setAutofocusIndex(index);
     setToggle((prev) => (prev + 1) % 2);
   };
 
-  const changeOption = (e: React.ChangeEvent<HTMLInputElement>) => {
-    templateQuestion.questionStatement = e.target.value;
-    setQuestion(templateQuestion);
+  const closeOption = (index: number) => {
+    setChoices(choices.filter((item, i) => i !== index));
+    setAutofocusIndex(index === 0 ? index : index - 1);
+    setToggle((prev) => (prev + 1) % 2);
+  };
+
+  const duplicateIdea = (index: number) => {
+    choices.splice(
+      index === 0 ? index : index - 1,
+      0,
+      (document.getElementById(`idea-${index}`) as HTMLInputElement).value
+    );
+    setChoices(choices);
+    setAutofocusIndex(index + 1);
+    setToggle((prev) => (prev + 1) % 2);
+  };
+
+  const keyEnter = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (e.key === "Enter") {
+      console.log(index);
+      choices.splice(index + 1, 0, "");
+      setChoices(choices);
+      setAutofocusIndex(index + 1);
+      setToggle((prev) => (prev + 1) % 2);
+    }
   };
 
   return (
     <div
       className={`w-5/12 h-auto min-h-[95%] flex flex-col justify-start items-center ${className}`}
     >
-      <div id="cat-q" className="flex flex-row w-full">
+      <div
+        id="cat-q"
+        className="flex flex-row w-full justify-center items-center"
+      >
+        <div className="text-blue-200 mr-5">
+          <HiOutlineLightBulb size={37} />
+        </div>
         <input
           type="text"
-          className="w-full h-auto bg-transparent focus:outline-none text-2xl mb-4 border-b-2 border-solid border-blue-700 py-5 text-center"
-          placeholder="Search"
-          onChange={changeOption}
+          className="w-full h-auto bg-transparent focus:outline-none text-2xl mb-4 border-b-2 border-solid border-blue-700 py-5 text-center text-white"
+          placeholder="Search Ideas"
+          // onChange={searchOption}
         />
         <button className="text-blue-200 ml-5" onClick={addOption}>
           <AiOutlinePlusCircle size={37} />
@@ -149,22 +179,12 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
       </div>
       <div
         id="categories"
-        className="w-full flex flex-col justify-start items-start mt-3"
+        className="w-full flex flex-col justify-start items-start h-[calc(100vh-150px)] overflow-y-scroll hidden-scrollbar mt-3"
       >
-        {/* <div className="w-auto h-full flex flex-row justify-start items-center">
-          <input
-            key={toggle}
-            id="category-question-ans-input"
-            type="text"
-            className="w-[200px] bg-transparent focus:outline-none text-2xl border-2 border-solid border-blue-200 py-2 px-1 rounded-md mr-2"
-          />
-          <button className="text-blue-200" onClick={addOption}>
-            <AiOutlinePlusCircle size={37} />
-          </button>
-        </div> */}
         <div
+          id="list-of-ideas"
           key={toggle}
-          className="w-full h-auto flex flex-col-reverse justify-start items-start mt-3"
+          className="w-full h-auto flex flex-col-reverse justify-start items-start"
         >
           <div
             id={`empty-0`}
@@ -187,20 +207,50 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
                   onDrop={(e) => dragDrop(e, index)}
                 ></div>
                 <div
-                  className="w-auto h-20 border-2 border-solid border-blue-200 items-center pl-3 pr-5 flex flex-row justify-start rounded-md hover:bg-slate-300 cursor-pointer"
+                  className="w-auto h-28 border-2 border-solid border-blue-200 items-center pl-3 pr-5 flex flex-row justify-start rounded-md hover:bg-slate-700 cursor-pointer"
                   draggable={true}
                   onDragStart={(e) => dragStart(e, index)}
                 >
-                  <MdOutlineDragIndicator
-                    size={35}
-                    className="border-r-2 border-solid border-blue-200 h-10/12 pr-1 w-auto"
-                  />
-                  <input className="mx-3 w-full text-white bg-transparent h-full focus:outline-none text-4xl" />
-                  <RxCrossCircled
-                    size={35}
-                    className="cursor-pointer"
-                    onClick={closeOption}
-                  />
+                  <div className="h-3/6 flex flex-col justify-center border-r-2 border-solid border-blue-200 ">
+                    <MdOutlineDragIndicator
+                      size={35}
+                      className="h-10/12 pr-1 w-auto text-slate-400"
+                    />
+                    <span className="text-white">{index}</span>
+                  </div>
+                  {autofocusIndex === index ? (
+                    <input
+                      id={`idea-${index}`}
+                      className="mx-3 w-full text-white bg-transparent h-full focus:outline-none text-3xl"
+                      onChange={async (e) => await changeIdea(e, index)}
+                      onKeyUp={(e) => keyEnter(e, index)}
+                      disabled={false}
+                      value={value}
+                      autoFocus
+                    />
+                  ) : (
+                    <input
+                      id={`idea-${index}`}
+                      className="mx-3 w-full text-white bg-transparent h-full focus:outline-none text-3xl"
+                      onChange={async (e) => await changeIdea(e, index)}
+                      onKeyUp={(e) => keyEnter(e, index)}
+                      disabled={false}
+                      value={value}
+                    />
+                  )}
+
+                  <div className="flex flex-col h-full justify-evenly">
+                    <RxCrossCircled
+                      size={35}
+                      className="cursor-pointer text-slate-400"
+                      onClick={() => closeOption(index)}
+                    />
+                    <HiOutlineDuplicate
+                      size={35}
+                      className="cursor-pointer text-slate-400"
+                      onClick={() => duplicateIdea(index)}
+                    />
+                  </div>
                 </div>
               </div>
             );
@@ -209,14 +259,6 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
       </div>
       <div id="answers"></div>
       <div id="cat-ans-map"></div>
-      {/* <div id="submitQuestion">
-        <button
-          className="h-12 w-auto border-2 border-solid border-blue-200 rounded-md px-3 mt-4"
-          onClick={() => addCategoryQuestion(question)}
-        >
-          Submit
-        </button>
-      </div> */}
     </div>
   );
 };
