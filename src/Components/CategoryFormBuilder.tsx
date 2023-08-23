@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { HiOutlineLightBulb, HiOutlineDuplicate } from "react-icons/hi";
@@ -11,7 +12,13 @@ interface Props {
 
 const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
   const [choices, setChoices] = useState<string[]>([]);
+  const [inputString, setInputString] = useState<string>("");
   const [autofocusIndex, setAutofocusIndex] = useState<number>(0);
+  const [connectionJSON, setConnectionJSON] = useState<object>({});
+  const [dropdownPosition, setDropdownPosition] = useState<string[]>([
+    "-2000px",
+    "-2000px",
+  ]);
   interface TProps {
     questionStatement: string | null;
     choices: string[];
@@ -24,7 +31,6 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
     categories: [],
     answer: {},
   };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [question, setQuestion] = useState(templateQuestion);
   const [toggle, setToggle] = useState(0);
 
@@ -121,7 +127,34 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
     index: number
   ) => {
     const inputElement = e.target;
-    choices[index] = `${inputElement.value}`;
+    const inputValue = inputElement.value;
+    const highlightTag = "<>";
+    const highlightIndex = inputValue.indexOf(highlightTag);
+
+    if (
+      highlightIndex !== -1 &&
+      choices.filter((idea) => idea !== inputString).length !== 0
+    ) {
+      const highlightedText = inputValue.substring(highlightIndex + 2);
+      if (highlightedText !== "") {
+      }
+      const textWidthPlaceholder: HTMLDivElement = document.getElementById(
+        "textWidthPlaceholder"
+      ) as HTMLDivElement;
+      textWidthPlaceholder.textContent = inputElement.value;
+      const textWidth: number = textWidthPlaceholder.offsetWidth;
+
+      setDropdownPosition([
+        `${inputElement.getClientRects()["0"].top + 80}px`,
+        `${textWidth + inputElement.getClientRects()["0"].left}px`,
+      ]);
+    } else {
+      setDropdownPosition(["-2000px", "-2000px"]);
+    }
+
+    choices[index] = inputValue;
+    setInputString(inputElement.value);
+    setChoices(choices);
     setAutofocusIndex(index);
     setToggle((prev) => (prev + 1) % 2);
   };
@@ -134,7 +167,7 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
 
   const duplicateIdea = (index: number) => {
     choices.splice(
-      index === 0 ? index : index - 1,
+      index + 1,
       0,
       (document.getElementById(`idea-${index}`) as HTMLInputElement).value
     );
@@ -148,7 +181,6 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
     index: number
   ) => {
     if (e.key === "Enter") {
-      console.log(index);
       choices.splice(index + 1, 0, "");
       setChoices(choices);
       setAutofocusIndex(index + 1);
@@ -158,8 +190,31 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
 
   return (
     <div
-      className={`w-5/12 h-auto min-h-[95%] flex flex-col justify-start items-center ${className}`}
+      className={`w-6/12 h-auto min-h-[95%] flex flex-col justify-start items-center ${className}`}
     >
+      <div
+        id="textWidthPlaceholder"
+        className="absolute whitespace-nowrap -top-[100px] text-3xl"
+      >
+        This is sample text
+      </div>
+      <div
+        className="absolute w-auto h-auto bg-white rounded-md px-4 py-3"
+        style={{ top: dropdownPosition[0], left: dropdownPosition[1] }}
+      >
+        {choices
+          .filter((idea) => idea !== inputString)
+          .map((idea, index) => {
+            return (
+              <>
+                <div key={index} className="mt-1 cursor-pointer">
+                  {idea}
+                </div>
+                <div className="w-auto border-b-2 border-solid border-slate-400"></div>
+              </>
+            );
+          })}
+      </div>
       <div
         id="cat-q"
         className="flex flex-row w-full justify-center items-center"
@@ -169,7 +224,7 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
         </div>
         <input
           type="text"
-          className="w-full h-auto bg-transparent focus:outline-none text-2xl mb-4 border-b-2 border-solid border-blue-700 py-5 text-center text-white"
+          className="w-5/6 h-auto bg-transparent focus:outline-none text-2xl mb-4 border-b-2 border-solid border-blue-700 py-5 text-center text-white"
           placeholder="Search Ideas"
           // onChange={searchOption}
         />
@@ -216,7 +271,7 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
                       size={35}
                       className="h-10/12 pr-1 w-auto text-slate-400"
                     />
-                    <span className="text-white">{index}</span>
+                    {/* <span className="text-white">{index}</span> */}
                   </div>
                   {autofocusIndex === index ? (
                     <input
@@ -257,8 +312,6 @@ const CategoryFormBuilder = ({ className, addCategoryQuestion }: Props) => {
           })}
         </div>
       </div>
-      <div id="answers"></div>
-      <div id="cat-ans-map"></div>
     </div>
   );
 };
