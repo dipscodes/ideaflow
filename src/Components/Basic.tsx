@@ -1,5 +1,3 @@
-import "remirror/styles/all.css";
-
 import { FC, useEffect } from "react";
 import { AnnotationExtension } from "remirror/extensions";
 import {
@@ -42,7 +40,7 @@ const SmallEditor: FC = () => {
   }, [setContent, commands]);
 
   return (
-    <div>
+    <div id="editor" className="px-3">
       <EditorComponent />
     </div>
   );

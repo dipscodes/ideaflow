@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import OneQForm from "./OneQForm";
-import CategoryFormBuilder from "./CategoryFormBuilder";
+import CategoryFormBuilderDiv from "./CategoryFormBuilderDiv";
 
 const FormBuilder = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -13,7 +13,7 @@ const FormBuilder = () => {
   return (
     <div className="w-full h-screen min-h-screen flex flex-col justify-start items-center">
       <OneQForm classname="bg-slate-800">
-        <CategoryFormBuilder
+        <CategoryFormBuilderDiv
           className=""
           addCategoryQuestion={addCategoryQuestion}
         />

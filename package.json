@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@nytimes/react-prosemirror": "^0.2.3",
     "@remirror/pm": "^2.0.8",
     "@remirror/react": "^2.0.35",
     "@remirror/react-editors": "^1.0.38",
@@ -15,6 +16,7 @@
     "@types/node": "^16.18.39",
     "@types/react": "^18.2.16",
     "@types/react-dom": "^18.2.7",
+    "prosemirror-schema-basic": "^1.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.10.1",

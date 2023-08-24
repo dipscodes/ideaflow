@@ -24,3 +24,37 @@
 .item.outsight {
   height: 2rem;
 }
+
+.highlight {
+  background-color: yellow;
+}
+
+.input-div {
+  @apply px-1 mx-3 w-full h-auto min-h-[13px] text-white bg-transparent focus:outline-none text-3xl flex flex-row justify-normal items-center whitespace-normal;
+}
+
+.remirror-theme {
+  width: 100%;
+}
+
+/* #editor {
+  
+} */
+
+.remirror-theme .ProseMirror > p:focus {
+  outline: none;
+  white-space: nowrap;
+}
+
+.remirror-theme .ProseMirror:active,
+.remirror-theme .ProseMirror:focus {
+  outline: none;
+}
+
+/* .remirror-theme .ProseMirror {
+  min-height: var(--rmr-space-6);
+  box-shadow: var(--rmr-color-border) 0px 0px 0px 0.1em;
+  padding: var(--rmr-space-3);
+  border-radius: var(--rmr-radius-border);
+  outline: none;
+} */
