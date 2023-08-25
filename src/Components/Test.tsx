@@ -280,16 +280,15 @@ const Test = ({ className }: Props) => {
         {choices.map((idea, index) => {
           if (idea === inputString) return null;
           return (
-            <>
+            <div key={index}>
               <div
-                key={index}
-                className="mt-1 cursor-pointer w-full  border-b-2 border-solid border-slate-400"
+                className="mt-1 cursor-pointer w-full min-w-[50px] border-b-2 border-solid border-slate-400"
                 onClick={() => selectIdea(index)}
               >
                 {idea}
               </div>
               <div className="w-auto border-b-2 border-solid border-slate-400"></div>
-            </>
+            </div>
           );
         })}
       </div>
