@@ -153,13 +153,28 @@ const CategoryFormBuilderDiv = ({ className, addCategoryQuestion }: Props) => {
     const inputValue = inputElement.innerText;
     const highlightIndex = inputValue.indexOf(highlightTag);
 
-    console.log(e.key, highlightIndex, choices);
     if (
       highlightIndex !== -1 &&
       choices.filter((idea) => idea !== inputString).length !== 0
     ) {
       const highlightedText = inputValue.substring(highlightIndex + 2);
+      const highlightedTextWithBrackets = inputValue.substring(highlightIndex);
+      const highlightedTextWithoutBrackets = inputValue.substring(
+        0,
+        highlightIndex
+      );
       if (highlightedText !== "") {
+        console.log(
+          `${highlightedTextWithoutBrackets}<span class"highlight" >${highlightedTextWithBrackets}</span>`
+        );
+        // setTimeout(() => {
+        //   const inputElement = document.getElementById(
+        //     `idea-${index + 1}`
+        //   ) as HTMLDivElement;
+        //   if (inputElement)
+        //     inputElement.innerText = `${highlightedTextWithoutBrackets}<span class="highlight" >${highlightedTextWithBrackets}</span>`;
+        // }, 50);
+        // inputElement.innerHTML = `${highlightedTextWithoutBrackets}<span class="highlight" >${highlightedTextWithBrackets}</span>`;
       }
       const textWidthPlaceholder: HTMLDivElement = document.getElementById(
         "textWidthPlaceholder"
@@ -310,11 +325,8 @@ const CategoryFormBuilderDiv = ({ className, addCategoryQuestion }: Props) => {
                     contentEditable={true}
                     role="textbox"
                     className="input-div"
-                    onKeyUp={(e) => keyEnter(e, index)}
-                  >
-                    <p>{value}</p>
-                  </div>
-                  {/* <Basic /> */}
+                    // onKeyUp={(e) => keyEnter(e, index)}
+                  ></div>
                   <div className="flex flex-col h-full justify-evenly">
                     <RxCrossCircled
                       size={35}
