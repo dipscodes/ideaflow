@@ -13,7 +13,7 @@ const Test = ({ className }: Props) => {
   const [choices, setChoices] = useState<string[]>([]);
   const [inputString, setInputString] = useState<string>("");
   const [autofocusIndex, setAutofocusIndex] = useState<number>(0);
-  const [connectionJSON, setConnectionJSON] = useState<object>({});
+  const [connectionList, setConnectionList] = useState<(number | null)[]>([]);
   const [content, setContent] = useState<string>("");
   const [dropdownPosition, setDropdownPosition] = useState<string[]>([
     "-2000px",
@@ -111,6 +111,8 @@ const Test = ({ className }: Props) => {
 
   const addOption = async () => {
     choices.push("");
+    console.log(choices);
+    connectionList[choices.length - 1] = null;
     setAutofocusIndex(choices.length - 1);
     setChoices(choices);
     setTimeout(() => {
@@ -218,7 +220,7 @@ const Test = ({ className }: Props) => {
     setToggle((prev) => (prev + 1) % 2);
   };
 
-  const handleOnInput = (e: any, index: number) => {
+  const handleOnInput = async (e: any, index: number) => {
     const inputElement = document.getElementById(
       `idea-${index}`
     ) as HTMLDivElement;
@@ -226,8 +228,11 @@ const Test = ({ className }: Props) => {
       const inputText = inputElement.innerText;
       const marker = "<>";
       const startIndex = inputText.indexOf(marker);
-
-      if (startIndex !== -1) {
+      choices[index] = inputText.replace("/^[a-zA-Z0-9<> ]*$/", "");
+      if (startIndex !== -1 && choices.length > 1) {
+        choices[index] = inputText
+          .substring(0, startIndex)
+          .replace("/^[a-zA-Z0-9<> ]*$/", "");
         const highlightedText = inputText.substring(startIndex + marker.length);
         const formattedText = `${inputText.substring(
           0,
@@ -237,8 +242,53 @@ const Test = ({ className }: Props) => {
           ""
         )}</span>`;
         inputElement.innerHTML = formattedText;
+
+        const textWidthPlaceholder: HTMLDivElement = document.getElementById(
+          "textWidthPlaceholder"
+        ) as HTMLDivElement;
+        const dropdown: HTMLDivElement = document.getElementById(
+          "idea-dropdown"
+        ) as HTMLDivElement;
+        textWidthPlaceholder.textContent = inputElement.innerText;
+        const textWidth: number = textWidthPlaceholder.offsetWidth;
+        dropdown.style.top = `${inputElement.getClientRects()["0"].top + 30}px`;
+        dropdown.style.left = `${
+          textWidth + inputElement.getClientRects()["0"].left - 10
+        }px`;
         setCaretToEnd(inputElement);
       }
+      console.log(choices);
+      setChoices(choices);
+    }
+  };
+  const selectIdea = (index: number) => {
+    // console.log(index);
+    const inputElement = document.getElementById(
+      `idea-${autofocusIndex}`
+    ) as HTMLDivElement;
+    if (inputElement) {
+      const inputText = inputElement.innerText;
+      const marker = "<>";
+      const startIndex = inputText.indexOf(marker);
+      const formattedText = `${inputText.substring(
+        0,
+        startIndex
+      )}<span class="highlight rounded-md px-2 ml-1"><>${choices[index].replace(
+        "/^[a-zA-Z0-9<> ]*$/",
+        ""
+      )}</span>`;
+      inputElement.innerHTML = formattedText;
+      connectionList[autofocusIndex] = index;
+      console.log(choices, connectionList, inputText);
+      const textWidthPlaceholder: HTMLDivElement = document.getElementById(
+        "textWidthPlaceholder"
+      ) as HTMLDivElement;
+      const dropdown: HTMLDivElement = document.getElementById(
+        "idea-dropdown"
+      ) as HTMLDivElement;
+      textWidthPlaceholder.textContent = inputElement.innerText;
+      dropdown.style.top = `-2000px`;
+      dropdown.style.left = `-2000px`;
     }
   };
 
@@ -254,23 +304,8 @@ const Test = ({ className }: Props) => {
 
         if (startIndex !== -1) {
           event.preventDefault();
-          /// inputElement.setSel;
         }
       }
-
-      // if (textAfterRange.startsWith("<>")) {
-      //   event.preventDefault(); // Prevent default backspace behavior
-
-      //   // Calculate the end offset for the range
-      //   const endOffset = range.endOffset + textAfterRange.indexOf("<>") + 2;
-
-      //   if (endOffset !== -1) {
-      //     const newNode = range.endContainer;
-      //     range.setEnd(newNode, endOffset);
-      //     selection.removeAllRanges();
-      //     selection.addRange(range);
-      //   }
-      // }
     }
   };
   const setCaretToEnd = (target: any) => {
@@ -285,8 +320,6 @@ const Test = ({ className }: Props) => {
     target.scrollTop = target.scrollHeight;
   };
 
-  const selectIdea = () => {};
-
   return (
     <div
       className={`w-6/12 h-auto min-h-[95%] flex flex-col justify-start items-center ${className}`}
@@ -298,8 +331,9 @@ const Test = ({ className }: Props) => {
         This is sample text
       </div>
       <div
+        id="idea-dropdown"
         className="absolute w-auto h-auto bg-white rounded-md px-4 py-3"
-        style={{ top: dropdownPosition[0], left: dropdownPosition[1] }}
+        style={{ top: "-2000px", left: "-2000px" }}
       >
         {choices.map((idea, index) => {
           if (idea === inputString) return null;
@@ -308,7 +342,7 @@ const Test = ({ className }: Props) => {
               <div
                 key={index}
                 className="mt-1 cursor-pointer w-full  border-b-2 border-solid border-slate-400"
-                onClick={() => selectIdea()}
+                onClick={() => selectIdea(index)}
               >
                 {idea}
               </div>
@@ -379,8 +413,15 @@ const Test = ({ className }: Props) => {
                     contentEditable
                     role="textbox"
                     className="px-1 mx-3 w-full h-[20px] text-white focus:outline-none text-2xl flex flex-row justify-start items-center whitespace-normal bg-transparent"
-                    onInput={(e) => handleOnInput(e, index)}
-                  ></div>
+                    onInput={async (e) => await handleOnInput(e, index)}
+                  >
+                    {choices[index]}
+                    {connectionList[index] !== null ? (
+                      <span className="highlight rounded-md px-2 ml-1">{`<>${
+                        choices[connectionList[index] as number]
+                      }`}</span>
+                    ) : null}
+                  </div>
                   <div className="flex flex-col h-full justify-evenly">
                     <RxCrossCircled
                       size={35}
