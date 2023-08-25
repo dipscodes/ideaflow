@@ -14,11 +14,6 @@ const Test = ({ className }: Props) => {
   const [inputString, setInputString] = useState<string>("");
   const [autofocusIndex, setAutofocusIndex] = useState<number>(0);
   const [connectionList, setConnectionList] = useState<(number | null)[]>([]);
-  const [content, setContent] = useState<string>("");
-  const [dropdownPosition, setDropdownPosition] = useState<string[]>([
-    "-2000px",
-    "-2000px",
-  ]);
   interface TProps {
     questionStatement: string | null;
     choices: string[];
@@ -174,85 +169,6 @@ const Test = ({ className }: Props) => {
     setToggle((prev) => (prev + 1) % 2);
   };
 
-  const keyEnter = (
-    e:
-      | React.KeyboardEvent<HTMLInputElement>
-      | React.KeyboardEvent<HTMLDivElement>,
-    index: number
-  ) => {
-    const inputElement = document.getElementById(
-      `idea-${index}`
-    ) as HTMLDivElement;
-    const highlightTag = "<>";
-    const inputValue = inputElement.innerText;
-    const highlightIndex = inputValue.indexOf(highlightTag);
-
-    if (
-      highlightIndex !== -1 &&
-      choices.filter((idea) => idea !== inputString).length !== 0
-    ) {
-      const highlightedText = inputValue.substring(highlightIndex + 2);
-      const highlightedTextWithBrackets = inputValue.substring(highlightIndex);
-      const highlightedTextWithoutBrackets = inputValue.substring(
-        0,
-        highlightIndex
-      );
-      if (highlightedText !== "") {
-        console.log(
-          `${highlightedTextWithoutBrackets}<span class"highlight" >${highlightedTextWithBrackets}</span>`
-        );
-        // setTimeout(() => {
-        //   const inputElement = document.getElementById(
-        //     `idea-${index + 1}`
-        //   ) as HTMLDivElement;
-        //   if (inputElement)
-        //     inputElement.innerText = `${highlightedTextWithoutBrackets}<span class="highlight" >${highlightedTextWithBrackets}</span>`;
-        // }, 50);
-        // inputElement.innerHTML = `${highlightedTextWithoutBrackets}<span class="highlight" >${highlightedTextWithBrackets}</span>`;
-      }
-      const textWidthPlaceholder: HTMLDivElement = document.getElementById(
-        "textWidthPlaceholder"
-      ) as HTMLDivElement;
-      textWidthPlaceholder.textContent = inputElement.innerText;
-      const textWidth: number = textWidthPlaceholder.offsetWidth;
-
-      setDropdownPosition([
-        `${inputElement.getClientRects()["0"].top + 80}px`,
-        `${textWidth + inputElement.getClientRects()["0"].left}px`,
-      ]);
-    } else {
-      setDropdownPosition(["-2000px", "-2000px"]);
-    }
-
-    if (e.key === "Enter") {
-      choices.splice(index + 1, 0, "");
-      setChoices(choices);
-      setAutofocusIndex(index + 1);
-      setTimeout(() => {
-        const inputElement = document.getElementById(
-          `idea-${index + 1}`
-        ) as HTMLDivElement;
-        if (inputElement) inputElement.focus();
-      }, 50);
-      setToggle((prev) => (prev + 1) % 2);
-    }
-
-    choices[index] = inputValue;
-    setInputString(inputElement.innerText);
-    setChoices(choices);
-    setAutofocusIndex(index);
-    setTimeout(() => {
-      const inputElement = document.getElementById(
-        `idea-${index}`
-      ) as HTMLDivElement;
-      if (inputElement) {
-        //inputElement.focus();
-        setCaretToEnd(inputElement);
-      }
-    }, 13);
-    setToggle((prev) => (prev + 1) % 2);
-  };
-
   const handleOnInput = async (e: any, index: number) => {
     const inputElement = document.getElementById(
       `idea-${index}`
@@ -297,6 +213,7 @@ const Test = ({ className }: Props) => {
       setChoices(tempChoice);
     }
   };
+
   const selectIdea = (index: number) => {
     const inputElement = document.getElementById(
       `idea-${autofocusIndex}`
@@ -332,6 +249,7 @@ const Test = ({ className }: Props) => {
       await addOption();
     }
   };
+
   const setCaretToEnd = (target: any) => {
     const range = document.createRange();
     const sel: any = window.getSelection();
