@@ -50,6 +50,22 @@ const Test = ({ className }: Props) => {
     copyList.splice(dIndex, 0, copyList.pop() as string);
     return copyList;
   };
+  const moveConnectionsIndexToIndex = (
+    array: (number | null)[],
+    sourceIndex: number,
+    destinationIndex: number
+  ): (number | null)[] => {
+    var copyList = [...array];
+    var removedElement = copyList.splice(sourceIndex, 1)[0];
+    copyList.push(removedElement);
+    let dIndex = destinationIndex;
+    sourceIndex > destinationIndex
+      ? (dIndex = destinationIndex + 1)
+      : (dIndex = destinationIndex);
+    if (dIndex >= copyList.length) dIndex = copyList.length - 1;
+    copyList.splice(dIndex, 0, copyList.pop() as number | null);
+    return copyList;
+  };
 
   const dragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -102,6 +118,13 @@ const Test = ({ className }: Props) => {
     setChoices(
       moveElementIndexToIndex(
         choices,
+        parseInt(e.dataTransfer.getData("index")),
+        index
+      )
+    );
+    setConnectionList(
+      moveConnectionsIndexToIndex(
+        connectionList,
         parseInt(e.dataTransfer.getData("index")),
         index
       )
