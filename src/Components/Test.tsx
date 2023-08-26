@@ -192,6 +192,24 @@ const Test = ({ className }: Props) => {
     }
   };
 
+  const moveStringsToStart = (strs: string[], s1: string) => {
+    const matchingStrings: string[] = [];
+    const semiMatchingStrings: string[] = [];
+    const nonMatchingStrings: string[] = [];
+
+    for (const str of strs) {
+      if (str.startsWith(s1)) {
+        matchingStrings.push(str);
+      } else if (str.includes(s1)) {
+        semiMatchingStrings.push(str);
+      } else {
+        nonMatchingStrings.push(str);
+      }
+    }
+
+    return matchingStrings.concat(nonMatchingStrings);
+  };
+
   const handleOnInput = async (e: any, index: number) => {
     const inputElement = document.getElementById(
       `idea-${index}`
@@ -219,13 +237,31 @@ const Test = ({ className }: Props) => {
           .replace("/^[a-zA-Z0-9<> ]*$/", "")
           .replace(/\n/g, "")}`;
         const highlightedText = inputText.substring(startIndex + marker.length);
-        const formattedText = `${inputText.substring(
+        let formattedText = `${inputText.substring(
           0,
           startIndex
         )}<span class="highlight rounded-md px-2 ml-1"><>${highlightedText.replace(
           /\s+/g,
           ""
         )}</span>`;
+
+        const shuffledTempChoice = moveStringsToStart(
+          tempChoice,
+          highlightedText.replace(/\s+/g, "")
+        );
+
+        if (shuffledTempChoice[0].startsWith(highlightedText)) {
+          // formattedText = `${inputText.substring(
+          //   0,
+          //   startIndex
+          // )}<span class="highlight rounded-md px-2 ml-1"><>${highlightedText.replace(
+          //   /\s+/g,
+          //   ""
+          // )}</span><span class="highlight-less rounded-md px-2 ml-1"><>${shuffledTempChoice[0]
+          //   .substring(highlightedText.length)
+          //   .replace(/\s+/g, "")}</span>`;
+        }
+
         inputElement.innerHTML = formattedText;
 
         const textWidthPlaceholder: HTMLDivElement = document.getElementById(
@@ -238,7 +274,7 @@ const Test = ({ className }: Props) => {
         dropdown.style.maxHeight = "200px";
         dropdown.style.overflowY = "scroll";
 
-        tempChoice.forEach((element: string, i: number) => {
+        shuffledTempChoice.forEach((element: string, i: number) => {
           if (i !== index) {
             const tempElement = document.createElement("div");
             tempElement.classList.add("idea-selector");
@@ -275,7 +311,8 @@ const Test = ({ className }: Props) => {
         `idea-${index}`
       ) as HTMLDivElement;
       if (inputElement && inputElement.innerText.includes("<>")) {
-        selectIdea(0);
+        const tempIndex = 0; // update this from ui
+        selectIdea(tempIndex);
       } else await addOption();
     }
     if (event.key === "Backspace") {

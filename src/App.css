@@ -30,6 +30,11 @@
   /* border-radius: 0.3rem; */
 }
 
+.highlight-less {
+  background-color: gainsboro;
+  /* border-radius: 0.3rem; */
+}
+
 .idea-selecor {
   margin-top: 0.25rem /* 4px */;
   cursor: pointer;
