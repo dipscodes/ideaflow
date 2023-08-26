@@ -11,10 +11,10 @@ interface Props {
 
 const Test = ({ className }: Props) => {
   const [choices, setChoices] = useState<string[]>([]);
-  const [autofocusIndex, setAutofocusIndex] = useState<number>(0);
   const [connectionList, setConnectionList] = useState<number[]>([]);
-  const inputIndex = useRef(-1);
   const [toggle, setToggle] = useState(0);
+  // const [autofocusIndex, setAutofocusIndex] = useState<number>(0);
+  // const inputIndex = useRef(-1);
 
   useEffect(() => {
     // localStorage.removeItem("choices");
@@ -145,7 +145,7 @@ const Test = ({ className }: Props) => {
   const addOption = async () => {
     choices.push("");
     connectionList[choices.length - 1] = -1;
-    setAutofocusIndex(choices.length - 1);
+    // setAutofocusIndex(choices.length - 1);
     setChoices(choices);
     setTimeout(() => {
       const inputElement = document.getElementById(
@@ -164,7 +164,7 @@ const Test = ({ className }: Props) => {
     setChoices(tempChoices);
     setConnectionList(tempConnections);
     // console.log(choices, connectionList);
-    setAutofocusIndex(index === 0 ? index : index - 1);
+    // setAutofocusIndex(index === 0 ? index : index - 1);
     saveChoices(tempChoices);
     saveConnectionList(tempConnections);
     setToggle((prev) => (prev + 1) % 2);
@@ -183,7 +183,7 @@ const Test = ({ className }: Props) => {
     // console.log(choices, connectionList);
     setChoices(tempChoices);
     setConnectionList(tempConnections);
-    setAutofocusIndex(index + 1);
+    // setAutofocusIndex(index + 1);
     setTimeout(() => {
       const inputElement = document.getElementById(
         `idea-${index + 1}`
@@ -195,9 +195,9 @@ const Test = ({ className }: Props) => {
     setToggle((prev) => (prev + 1) % 2);
   };
 
-  const selectIdea = (index: number) => {
+  const selectIdea = (index: number, focusIndex: number) => {
     const inputElement = document.getElementById(
-      `idea-${autofocusIndex}`
+      `idea-${focusIndex}`
     ) as HTMLDivElement;
     if (inputElement) {
       const inputText = inputElement.innerText;
@@ -206,11 +206,11 @@ const Test = ({ className }: Props) => {
       const formattedText = `${inputText.substring(
         0,
         startIndex
-      )}<span id="main-span-${autofocusIndex}" class="highlight rounded-md px-2 ml-1"><>${
+      )}<span id="main-span-${focusIndex}" class="highlight rounded-md px-2 ml-1"><>${
         choices[index]
       }</span>`;
       inputElement.innerHTML = formattedText;
-      connectionList[autofocusIndex] = index;
+      connectionList[focusIndex] = index;
       const textWidthPlaceholder: HTMLDivElement = document.getElementById(
         "textWidthPlaceholder"
       ) as HTMLDivElement;
@@ -311,7 +311,7 @@ const Test = ({ className }: Props) => {
             if (i === 0)
               tempElement.style.backgroundColor = "rgb(8 145 178 / 1)";
             tempElement.addEventListener("click", () => {
-              selectIdea(element[1]);
+              selectIdea(element[1], index);
             });
             dropdown.append(tempElement);
           }
@@ -330,6 +330,7 @@ const Test = ({ className }: Props) => {
 
   const handleKeyDown = async (event: any, index: number) => {
     // setAutofocusIndex(index);
+
     if (event.key === "Space") {
       event.preventDefault();
       const inputElement = document.getElementById(
@@ -337,6 +338,7 @@ const Test = ({ className }: Props) => {
       ) as HTMLDivElement;
       setCaretToEnd(inputElement);
     }
+
     if (event.key === "Enter") {
       event.preventDefault();
       const inputElement = document.getElementById(
@@ -353,9 +355,8 @@ const Test = ({ className }: Props) => {
         const firshChild = dropDownElement.firstElementChild;
         if (firshChild) {
           tempIndex = parseInt(firshChild.id.split("-")[2]);
-          console.log(firshChild.id.split("-")[2]);
         }
-        selectIdea(tempIndex);
+        selectIdea(tempIndex, index);
       } else await addOption();
     }
 
@@ -368,13 +369,21 @@ const Test = ({ className }: Props) => {
       ) as HTMLSpanElement;
       if (inputElement && spanELement) {
         event.preventDefault();
-        // console.log(`main-span-${index}`);
-        if (spanELement.style.backgroundColor === "red") {
+        if (spanELement.getAttribute("data-delete") === "true") {
           inputElement.innerHTML = choices[index];
           connectionList[index] = -1;
           setConnectionList(connectionList);
           setCaretToEnd(inputElement);
-        } else spanELement.style.backgroundColor = "red";
+          saveConnectionList(connectionList);
+          const dropdown: HTMLDivElement = document.getElementById(
+            "idea-dropdown"
+          ) as HTMLDivElement;
+          dropdown.style.top = `-2000px`;
+          dropdown.style.left = `-2000px`;
+        } else {
+          spanELement.setAttribute("data-delete", "true");
+          spanELement.style.backgroundColor = "gray ";
+        }
       }
     }
   };
@@ -412,7 +421,7 @@ const Test = ({ className }: Props) => {
               console.log(
                 choices,
                 connectionList,
-                autofocusIndex,
+                // autofocusIndex,
                 localStorage.getItem("choices"),
                 localStorage.getItem("connections")
               )
@@ -466,13 +475,14 @@ const Test = ({ className }: Props) => {
                   className="w-auto h-[100px] border-2 border-solid border-blue-200 items-center pl-3 pr-5 flex flex-row justify-start rounded-md hover:bg-slate-700 cursor-pointer"
                   draggable={true}
                   onDragStart={(e) => dragStart(e, index)}
-                  onClick={(e) =>
+                  onClick={(e) => {
+                    // setAutofocusIndex(index);
                     setCaretToEnd(
                       e.currentTarget.querySelector(
                         'div[contenteditable="true"]'
                       )
-                    )
-                  }
+                    );
+                  }}
                 >
                   <div className="h-3/6 flex flex-col justify-center border-r-2 border-solid border-blue-200">
                     <MdOutlineDragIndicator
