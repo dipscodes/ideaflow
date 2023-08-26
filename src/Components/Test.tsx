@@ -143,18 +143,21 @@ const Test = ({ className }: Props) => {
   };
 
   const addOption = async () => {
-    choices.push("");
-    connectionList[choices.length - 1] = -1;
+    const tempChoices = [...choices, ""];
+    const tempConnections = connectionList;
+    tempConnections[tempChoices.length - 1] = -1;
+    // choices.push("");
     // setAutofocusIndex(choices.length - 1);
-    setChoices(choices);
+    setChoices(tempChoices);
+    setConnectionList(tempConnections);
     setTimeout(() => {
       const inputElement = document.getElementById(
-        `idea-${choices.length - 1}`
+        `idea-${tempChoices.length - 1}`
       ) as HTMLDivElement;
       if (inputElement) setCaretToEnd(inputElement);
     }, 50);
-    saveChoices(choices);
-    saveConnectionList(connectionList);
+    saveChoices(tempChoices);
+    saveConnectionList(tempConnections);
     setToggle((prev) => (prev + 1) % 2);
   };
 
@@ -180,9 +183,9 @@ const Test = ({ className }: Props) => {
       tempChoices = [...choices, choices[index]];
       tempConnections = [...connectionList, -1];
     }
-    // console.log(choices, connectionList);
     setChoices(tempChoices);
     setConnectionList(tempConnections);
+    // console.log(choices, connectionList);
     // setAutofocusIndex(index + 1);
     setTimeout(() => {
       const inputElement = document.getElementById(
