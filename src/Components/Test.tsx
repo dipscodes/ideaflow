@@ -181,9 +181,16 @@ const Test = ({ className }: Props) => {
 
   const closeOption = (index: number) => {
     const tempChoices = choices.filter((item, i) => i !== index);
-    const tempConnections = connectionList.filter((item, i) => i !== index);
+    const tempConnections = connectionList
+      .filter((item, i) => i !== index)
+      .map((value: number, i: number) => {
+        if (value === index) return -1;
+        if (value > index && value !== -1) return value - 1;
+        return value;
+      });
     setChoices(tempChoices);
     setConnectionList(tempConnections);
+    console.log(tempConnections);
     // console.log(choices, connectionList);
     // setAutofocusIndex(index === 0 ? index : index - 1);
     saveChoices(tempChoices);
@@ -195,16 +202,26 @@ const Test = ({ className }: Props) => {
     let tempChoices: string[];
     let tempConnections: number[];
     if (index !== choices.length - 1) {
-      tempChoices = choices.splice(index + 1, 0, choices[index]);
-      tempConnections = connectionList.splice(index + 1, 0, -1);
+      // tempChoices = choices.splice(index + 1, 0, choices[index]);
+      // tempConnections = connectionList.splice(index + 1, 0, -1);
+      const firstChoicePart = choices.slice(0, index + 1);
+      const secondChoiePart = choices.slice(index + 1);
+      const firstConnectionPart = connectionList.slice(0, index + 1);
+      const secondConnectionPart = connectionList.slice(index + 1);
+      tempChoices = firstChoicePart.concat(choices[index], secondChoiePart);
+      tempConnections = firstConnectionPart
+        .concat(-1, secondConnectionPart)
+        .map((value) =>
+          value !== -1 && value > index + 1 ? value + 1 : value
+        );
+      // tempConnections = tempConnections.concat(-1, secondConnectionPart);
+      console.log(tempConnections);
     } else {
       tempChoices = [...choices, choices[index]];
       tempConnections = [...connectionList, -1];
     }
     setChoices(tempChoices);
     setConnectionList(tempConnections);
-    // console.log(choices, connectionList);
-    // setAutofocusIndex(index + 1);
     setTimeout(() => {
       const inputElement = document.getElementById(
         `idea-${index + 1}`
@@ -422,25 +439,28 @@ const Test = ({ className }: Props) => {
   };
 
   const seachIdeas = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputElement = document.getElementsByClassName(
+    const inputDivElements = document.getElementsByClassName(
       "search-selection"
     ) as HTMLCollectionOf<Element>;
-    for (let i = 0; i < inputElement.length; i++) {
-      const singleDiv = inputElement[i].querySelector(
-        'div[contenteditable="true"]'
-      );
-      if (
-        singleDiv?.innerHTML
-          .replace(/<span.*?<\/span>/, "")
-          .includes(e.target.value) &&
-        e.target.value !== ""
-      ) {
-        inputElement[i].removeAttribute("hidden");
-        // console.log(singleDiv?.innerHTML.replace(/<span.*?<\/span>/, ""));
-      } else {
-        inputElement[i].setAttribute("hidden", "hidden");
+    if (inputDivElements) {
+      for (let i = 0; i < inputDivElements.length; i++) {
+        const singleDiv = inputDivElements[i].querySelector(
+          'div[contenteditable="true"]'
+        );
+        if (
+          singleDiv?.innerHTML
+            .replace(/<span.*?<\/span>/, "")
+            .includes(e.target.value) &&
+          e.target.value !== ""
+        ) {
+          inputDivElements[i].removeAttribute("hidden");
+          // console.log(singleDiv?.innerHTML.replace(/<span.*?<\/span>/, ""));
+        } else {
+          inputDivElements[i].setAttribute("hidden", "hidden");
+        }
+        if (e.target.value === "")
+          inputDivElements[i].removeAttribute("hidden");
       }
-      if (e.target.value === "") inputElement[i].removeAttribute("hidden");
     }
   };
 
