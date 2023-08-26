@@ -207,7 +207,9 @@ const Test = ({ className }: Props) => {
       }
     }
 
-    return matchingStrings.concat(nonMatchingStrings);
+    return matchingStrings
+      .concat(semiMatchingStrings)
+      .concat(nonMatchingStrings);
   };
 
   const handleOnInput = async (e: any, index: number) => {
@@ -240,7 +242,7 @@ const Test = ({ className }: Props) => {
         let formattedText = `${inputText.substring(
           0,
           startIndex
-        )}<span class="highlight rounded-md px-2 ml-1"><>${highlightedText.replace(
+        )}<span id="main-span-${index}" class="highlight rounded-md px-2 ml-1"><>${highlightedText.replace(
           /\s+/g,
           ""
         )}</span>`;
@@ -250,19 +252,31 @@ const Test = ({ className }: Props) => {
           highlightedText.replace(/\s+/g, "")
         );
 
-        if (shuffledTempChoice[0].startsWith(highlightedText)) {
-          // formattedText = `${inputText.substring(
-          //   0,
-          //   startIndex
-          // )}<span class="highlight rounded-md px-2 ml-1"><>${highlightedText.replace(
-          //   /\s+/g,
-          //   ""
-          // )}</span><span class="highlight-less rounded-md px-2 ml-1"><>${shuffledTempChoice[0]
-          //   .substring(highlightedText.length)
-          //   .replace(/\s+/g, "")}</span>`;
-        }
+        // if (
+        //   shuffledTempChoice[0].startsWith(highlightedText.replace(/\s+/g, ""))
+        // ) {
+        //   console.log(
+        //     shuffledTempChoice[0].substring(
+        //       highlightedText.replace(/\s+/g, "").length
+        //     )
+        //   );
+        //   formattedText = `${inputText.substring(
+        //     0,
+        //     startIndex
+        //   )}<span id="main-span-${index}" class="highlight rounded-md px-2 ml-1"><>${highlightedText.replace(
+        //     /\s+/g,
+        //     ""
+        //   )}</span><span id="sub-span-${index}" class="highlight-less rounded-md px-2">${shuffledTempChoice[0]
+        //     .substring(highlightedText.replace(/\s+/g, "").length)
+        //     .replace(/\s+/g, "")}</span>`;
+        // }
+
+        // const inputSpanElement = document.getElementById(
+        //   `main-span-${index}`
+        // ) as any;
 
         inputElement.innerHTML = formattedText;
+        // if (inputSpanElement) setCaretToEnd(inputSpanElement);
 
         const textWidthPlaceholder: HTMLDivElement = document.getElementById(
           "textWidthPlaceholder"
