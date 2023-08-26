@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { HiOutlineLightBulb, HiOutlineDuplicate } from "react-icons/hi";
 import { MdOutlineDragIndicator } from "react-icons/md";
@@ -403,6 +403,29 @@ const Test = ({ className }: Props) => {
     target.scrollTop = target.scrollHeight;
   };
 
+  const seachIdeas = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputElement = document.getElementsByClassName(
+      "search-selection"
+    ) as HTMLCollectionOf<Element>;
+    for (let i = 0; i < inputElement.length; i++) {
+      const singleDiv = inputElement[i].querySelector(
+        'div[contenteditable="true"]'
+      );
+      if (
+        singleDiv?.innerHTML
+          .replace(/<span.*?<\/span>/, "")
+          .includes(e.target.value) &&
+        e.target.value !== ""
+      ) {
+        inputElement[i].removeAttribute("hidden");
+        console.log(singleDiv?.innerHTML.replace(/<span.*?<\/span>/, ""));
+      } else {
+        inputElement[i].setAttribute("hidden", "hidden");
+      }
+      if (e.target.value === "") inputElement[i].removeAttribute("hidden");
+    }
+  };
+
   return (
     <div
       className={`w-6/12 h-auto min-h-[95%] flex flex-col justify-start items-center ${className}`}
@@ -435,6 +458,7 @@ const Test = ({ className }: Props) => {
           type="text"
           className="w-5/6 h-auto bg-transparent focus:outline-none text-2xl mb-4 border-b-2 border-solid border-blue-700 py-5 text-center text-white"
           placeholder="Search Ideas"
+          onChange={(e) => seachIdeas(e)}
         />
         <button className="text-blue-200 ml-5" onClick={addOption}>
           <AiOutlinePlusCircle size={37} />
@@ -465,7 +489,10 @@ const Test = ({ className }: Props) => {
           {choices.map((value, index) => {
             const indexPlusOne = index + 1;
             return (
-              <div key={`${value}-${index}`} className="w-full">
+              <div
+                key={`${value}-${index}`}
+                className="w-full search-selection"
+              >
                 <div
                   id={`empty-${indexPlusOne}`}
                   className="w-auto item outsight"
