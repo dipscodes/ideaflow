@@ -173,10 +173,9 @@ const Test = ({ className }: Props) => {
       const formattedText = `${inputText.substring(
         0,
         startIndex
-      )}<span class="highlight rounded-md px-2 ml-1"><>${choices[index].replace(
-        "/^[a-zA-Z0-9<> ]*$/",
-        ""
-      )}</span>`;
+      )}<span id="main-span-${autofocusIndex}" class="highlight rounded-md px-2 ml-1"><>${choices[
+        index
+      ].replace("/^[a-zA-Z0-9<> ]*$/", "")}</span>`;
       inputElement.innerHTML = formattedText;
       connectionList[autofocusIndex] = index;
       const textWidthPlaceholder: HTMLDivElement = document.getElementById(
@@ -330,7 +329,22 @@ const Test = ({ className }: Props) => {
       } else await addOption();
     }
     if (event.key === "Backspace") {
-      event.preventDefault();
+      const inputElement = document.getElementById(
+        `idea-${index}`
+      ) as HTMLDivElement;
+      const spanELement = document.getElementById(
+        `main-span-${index}`
+      ) as HTMLSpanElement;
+      if (inputElement && spanELement) {
+        event.preventDefault();
+        console.log(`main-span-${index}`);
+        if (spanELement.style.backgroundColor === "red") {
+          inputElement.innerHTML = choices[index];
+          connectionList[index] = null;
+          setConnectionList(connectionList);
+          setCaretToEnd(inputElement);
+        } else spanELement.style.backgroundColor = "red";
+      }
     }
   };
 
@@ -431,7 +445,10 @@ const Test = ({ className }: Props) => {
                   >
                     {choices[index]}
                     {connectionList[index] !== null ? (
-                      <span className="highlight rounded-md px-2 ml-1">{`<>${
+                      <span
+                        id={`main-span-${index}`}
+                        className="highlight rounded-md px-2 ml-1"
+                      >{`<>${
                         choices[connectionList[index] as number] ?? ""
                       }`}</span>
                     ) : null}
