@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { HiOutlineLightBulb, HiOutlineDuplicate } from "react-icons/hi";
 import { MdOutlineDragIndicator } from "react-icons/md";
@@ -12,14 +12,36 @@ interface Props {
 const Test = ({ className }: Props) => {
   const [choices, setChoices] = useState<string[]>([]);
   const [autofocusIndex, setAutofocusIndex] = useState<number>(0);
-  const [connectionList, setConnectionList] = useState<(number | null)[]>([]);
+  const [connectionList, setConnectionList] = useState<number[]>([]);
   const inputIndex = useRef(-1);
+  const [toggle, setToggle] = useState(0);
 
   useEffect(() => {
-    // console.log(choices);
-  }, [choices]);
+    // localStorage.removeItem("choices");
+    // localStorage.removeItem("connections");
+    if (localStorage.getItem("choices") === null)
+      localStorage.setItem("choices", JSON.stringify([]));
+    else setChoices(JSON.parse(localStorage.getItem("choices") as string));
 
-  const [toggle, setToggle] = useState(0);
+    if (localStorage.getItem("connections") === null)
+      localStorage.setItem("connections", JSON.stringify([]));
+    else
+      setConnectionList(
+        JSON.parse(localStorage.getItem("connections") as string)
+      );
+  }, []);
+
+  const saveChoices = (strings?: string[]) => {
+    if (strings) localStorage.setItem("choices", JSON.stringify(strings));
+    else localStorage.setItem("choices", JSON.stringify(choices));
+    // console.log(localStorage.getItem("choices"));
+  };
+
+  const saveConnectionList = (numbers?: number[]) => {
+    if (numbers) localStorage.setItem("connections", JSON.stringify(numbers));
+    else localStorage.setItem("connections", JSON.stringify(connectionList));
+    // console.log(localStorage.getItem("connections"));
+  };
 
   const moveElementIndexToIndex = (
     array: string[],
@@ -39,10 +61,10 @@ const Test = ({ className }: Props) => {
   };
 
   const moveConnectionsIndexToIndex = (
-    array: (number | null)[],
+    array: number[],
     sourceIndex: number,
     destinationIndex: number
-  ): (number | null)[] => {
+  ): number[] => {
     var copyList = [...array];
     var removedElement = copyList.splice(sourceIndex, 1)[0];
     copyList.push(removedElement);
@@ -51,7 +73,7 @@ const Test = ({ className }: Props) => {
       ? (dIndex = destinationIndex + 1)
       : (dIndex = destinationIndex);
     if (dIndex >= copyList.length) dIndex = copyList.length - 1;
-    copyList.splice(dIndex, 0, copyList.pop() as number | null);
+    copyList.splice(dIndex, 0, copyList.pop() as number);
     return copyList;
   };
 
@@ -103,62 +125,73 @@ const Test = ({ className }: Props) => {
 
   const dragDrop = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     e.preventDefault();
-    setChoices(
-      moveElementIndexToIndex(
-        choices,
-        parseInt(e.dataTransfer.getData("index")),
-        index
-      )
+    const tempChoices = moveElementIndexToIndex(
+      choices,
+      parseInt(e.dataTransfer.getData("index")),
+      index
     );
-    setConnectionList(
-      moveConnectionsIndexToIndex(
-        connectionList,
-        parseInt(e.dataTransfer.getData("index")),
-        index
-      )
+    const tempConnections = moveConnectionsIndexToIndex(
+      connectionList,
+      parseInt(e.dataTransfer.getData("index")),
+      index
     );
+    setChoices(tempChoices);
+    setConnectionList(tempConnections);
+    saveChoices(tempChoices);
+    saveConnectionList(tempConnections);
     setToggle((prev) => (prev + 1) % 2);
   };
 
   const addOption = async () => {
     choices.push("");
-    connectionList[choices.length - 1] = null;
+    connectionList[choices.length - 1] = -1;
     setAutofocusIndex(choices.length - 1);
     setChoices(choices);
     setTimeout(() => {
       const inputElement = document.getElementById(
         `idea-${choices.length - 1}`
       ) as HTMLDivElement;
-      if (inputElement) inputElement.focus();
+      if (inputElement) setCaretToEnd(inputElement);
     }, 50);
+    saveChoices(choices);
+    saveConnectionList(connectionList);
     setToggle((prev) => (prev + 1) % 2);
   };
 
   const closeOption = (index: number) => {
-    setChoices(choices.filter((item, i) => i !== index));
-    setConnectionList(connectionList.filter((item, i) => i !== index));
+    const tempChoices = choices.filter((item, i) => i !== index);
+    const tempConnections = connectionList.filter((item, i) => i !== index);
+    setChoices(tempChoices);
+    setConnectionList(tempConnections);
     // console.log(choices, connectionList);
     setAutofocusIndex(index === 0 ? index : index - 1);
+    saveChoices(tempChoices);
+    saveConnectionList(tempConnections);
     setToggle((prev) => (prev + 1) % 2);
   };
 
   const duplicateIdea = (index: number) => {
+    let tempChoices: string[];
+    let tempConnections: number[];
     if (index !== choices.length - 1) {
-      choices.splice(index + 1, 0, choices[index]);
-      connectionList.splice(index + 1, 0, null);
+      tempChoices = choices.splice(index + 1, 0, choices[index]);
+      tempConnections = connectionList.splice(index + 1, 0, -1);
     } else {
-      choices.push("");
-      connectionList.push(null);
+      tempChoices = [...choices, choices[index]];
+      tempConnections = [...connectionList, -1];
     }
     // console.log(choices, connectionList);
-    setChoices(choices);
+    setChoices(tempChoices);
+    setConnectionList(tempConnections);
     setAutofocusIndex(index + 1);
     setTimeout(() => {
       const inputElement = document.getElementById(
         `idea-${index + 1}`
       ) as HTMLDivElement;
-      if (inputElement) inputElement.focus();
+      if (inputElement) setCaretToEnd(inputElement);
     }, 50);
+    saveChoices(tempChoices);
+    saveConnectionList(tempConnections);
     setToggle((prev) => (prev + 1) % 2);
   };
 
@@ -173,9 +206,9 @@ const Test = ({ className }: Props) => {
       const formattedText = `${inputText.substring(
         0,
         startIndex
-      )}<span id="main-span-${autofocusIndex}" class="highlight rounded-md px-2 ml-1"><>${choices[
-        index
-      ].replace("/^[a-zA-Z0-9<> ]*$/", "")}</span>`;
+      )}<span id="main-span-${autofocusIndex}" class="highlight rounded-md px-2 ml-1"><>${
+        choices[index]
+      }</span>`;
       inputElement.innerHTML = formattedText;
       connectionList[autofocusIndex] = index;
       const textWidthPlaceholder: HTMLDivElement = document.getElementById(
@@ -187,22 +220,25 @@ const Test = ({ className }: Props) => {
       textWidthPlaceholder.textContent = inputElement.innerText;
       dropdown.style.top = `-2000px`;
       dropdown.style.left = `-2000px`;
+      setConnectionList(connectionList);
+      saveChoices();
+      saveConnectionList(connectionList);
       setCaretToEnd(inputElement);
     }
   };
 
   const moveStringsToStart = (strs: string[], s1: string) => {
-    const matchingStrings: string[] = [];
-    const semiMatchingStrings: string[] = [];
-    const nonMatchingStrings: string[] = [];
+    const matchingStrings: [string, number][] = [];
+    const semiMatchingStrings: [string, number][] = [];
+    const nonMatchingStrings: [string, number][] = [];
 
-    for (const str of strs) {
-      if (str.startsWith(s1)) {
-        matchingStrings.push(str);
-      } else if (str.includes(s1)) {
-        semiMatchingStrings.push(str);
+    for (let i = 0; i < strs.length; i++) {
+      if (strs[i].startsWith(s1)) {
+        matchingStrings.push([strs[i], i]);
+      } else if (strs[i].includes(s1)) {
+        semiMatchingStrings.push([strs[i], i]);
       } else {
-        nonMatchingStrings.push(str);
+        nonMatchingStrings.push([strs[i], i]);
       }
     }
 
@@ -216,83 +252,53 @@ const Test = ({ className }: Props) => {
       `idea-${index}`
     ) as HTMLDivElement;
     const tempChoice = choices;
-    inputIndex.current = index; // ref update
 
     if (inputElement) {
-      const inputText = inputElement.innerText;
+      let inputText = inputElement.innerText;
       const marker = "<>";
       const startIndex = inputText.indexOf(marker);
-
       const dropdown: HTMLDivElement = document.getElementById(
         "idea-dropdown"
       ) as HTMLDivElement;
       dropdown.style.top = `-2000px`;
       dropdown.style.left = `-2000px`;
-      tempChoice[index] = inputText
-        .replace("/^[a-zA-Z0-9<> ]*$/", "")
-        .replace(/\n/g, "");
-
+      // console.log(inputText);
+      const brElements = inputElement.getElementsByTagName("br");
+      if (brElements[0]) {
+        inputElement.innerHTML = inputElement.innerHTML.replace(/<br>/g, "  ");
+      }
+      tempChoice[index] = inputText.replace(/\n/g, "");
       if (startIndex !== -1 && tempChoice.length > 1) {
         tempChoice[index] = `${inputText
           .substring(0, startIndex)
-          .replace("/^[a-zA-Z0-9<> ]*$/", "")
           .replace(/\n/g, "")}`;
         const highlightedText = inputText.substring(startIndex + marker.length);
         let formattedText = `${inputText.substring(
           0,
           startIndex
         )}<span id="main-span-${index}" class="highlight rounded-md px-2 ml-1"><>${highlightedText.replace(
-          /\s+/g,
+          / {2,}/g,
           ""
         )}</span>`;
-
         const shuffledTempChoice = moveStringsToStart(
           tempChoice,
-          highlightedText.replace(/\s+/g, "")
+          highlightedText.replace(/ {2,}/g, "")
         );
-
-        // if (
-        //   shuffledTempChoice[0].startsWith(highlightedText.replace(/\s+/g, ""))
-        // ) {
-        //   console.log(
-        //     shuffledTempChoice[0].substring(
-        //       highlightedText.replace(/\s+/g, "").length
-        //     )
-        //   );
-        //   formattedText = `${inputText.substring(
-        //     0,
-        //     startIndex
-        //   )}<span id="main-span-${index}" class="highlight rounded-md px-2 ml-1"><>${highlightedText.replace(
-        //     /\s+/g,
-        //     ""
-        //   )}</span><span id="sub-span-${index}" class="highlight-less rounded-md px-2">${shuffledTempChoice[0]
-        //     .substring(highlightedText.replace(/\s+/g, "").length)
-        //     .replace(/\s+/g, "")}</span>`;
-        // }
-
-        // const inputSpanElement = document.getElementById(
-        //   `main-span-${index}`
-        // ) as any;
-
         inputElement.innerHTML = formattedText;
-        // if (inputSpanElement) setCaretToEnd(inputSpanElement);
-
         const textWidthPlaceholder: HTMLDivElement = document.getElementById(
           "textWidthPlaceholder"
         ) as HTMLDivElement;
         textWidthPlaceholder.textContent = inputElement.innerText;
         const textWidth: number = textWidthPlaceholder.offsetWidth;
-
         dropdown.innerHTML = "";
         dropdown.style.maxHeight = "200px";
         dropdown.style.overflowY = "scroll";
-
-        shuffledTempChoice.forEach((element: string, i: number) => {
-          if (i !== index) {
+        shuffledTempChoice.forEach((element: [string, number], i: number) => {
+          if (element[1] !== index) {
             const tempElement = document.createElement("div");
             tempElement.classList.add("idea-selector");
-            tempElement.id = `index-${i}`;
-            tempElement.innerText = element;
+            tempElement.id = `idea-index-${element[1]}`;
+            tempElement.innerText = element[0];
             tempElement.style.marginTop = "0.25rem";
             tempElement.style.cursor = "pointer";
             tempElement.style.width = "100%";
@@ -300,34 +306,59 @@ const Test = ({ className }: Props) => {
             tempElement.style.borderStyle = "solid";
             tempElement.style.borderColor = "rgb(148 163 184 / 1))";
             tempElement.style.minWidth = "50px";
+            tempElement.style.paddingLeft = "0.25rem";
+            tempElement.style.paddingRight = "0.25rem";
+            if (i === 0)
+              tempElement.style.backgroundColor = "rgb(8 145 178 / 1)";
             tempElement.addEventListener("click", () => {
-              selectIdea(i);
+              selectIdea(element[1]);
             });
             dropdown.append(tempElement);
           }
         });
-
         dropdown.style.top = `${inputElement.getClientRects()["0"].top + 30}px`;
         dropdown.style.left = `${
           textWidth + inputElement.getClientRects()["0"].left - 10
         }px`;
       }
       setChoices(tempChoice);
+      saveChoices();
+      saveChoices();
       setCaretToEnd(inputElement);
     }
   };
 
   const handleKeyDown = async (event: any, index: number) => {
+    // setAutofocusIndex(index);
+    if (event.key === "Space") {
+      event.preventDefault();
+      const inputElement = document.getElementById(
+        `idea-${index}`
+      ) as HTMLDivElement;
+      setCaretToEnd(inputElement);
+    }
     if (event.key === "Enter") {
       event.preventDefault();
       const inputElement = document.getElementById(
         `idea-${index}`
       ) as HTMLDivElement;
-      if (inputElement && inputElement.innerText.includes("<>")) {
-        const tempIndex = 0; // update this from ui
+      const dropDownElement = document.getElementById(
+        "idea-dropdown"
+      ) as HTMLDivElement;
+      const spanELement = document.getElementById(
+        `main-span-${index}`
+      ) as HTMLSpanElement;
+      if (inputElement && spanELement) {
+        let tempIndex = 0; // update this from ui
+        const firshChild = dropDownElement.firstElementChild;
+        if (firshChild) {
+          tempIndex = parseInt(firshChild.id.split("-")[2]);
+          console.log(firshChild.id.split("-")[2]);
+        }
         selectIdea(tempIndex);
       } else await addOption();
     }
+
     if (event.key === "Backspace") {
       const inputElement = document.getElementById(
         `idea-${index}`
@@ -337,10 +368,10 @@ const Test = ({ className }: Props) => {
       ) as HTMLSpanElement;
       if (inputElement && spanELement) {
         event.preventDefault();
-        console.log(`main-span-${index}`);
+        // console.log(`main-span-${index}`);
         if (spanELement.style.backgroundColor === "red") {
           inputElement.innerHTML = choices[index];
-          connectionList[index] = null;
+          connectionList[index] = -1;
           setConnectionList(connectionList);
           setCaretToEnd(inputElement);
         } else spanELement.style.backgroundColor = "red";
@@ -377,7 +408,15 @@ const Test = ({ className }: Props) => {
         <div className="text-blue-200 mr-5">
           <HiOutlineLightBulb
             size={37}
-            onClick={() => console.log(choices, connectionList)}
+            onClick={() =>
+              console.log(
+                choices,
+                connectionList,
+                autofocusIndex,
+                localStorage.getItem("choices"),
+                localStorage.getItem("connections")
+              )
+            }
           />
         </div>
         <input
@@ -427,8 +466,15 @@ const Test = ({ className }: Props) => {
                   className="w-auto h-[100px] border-2 border-solid border-blue-200 items-center pl-3 pr-5 flex flex-row justify-start rounded-md hover:bg-slate-700 cursor-pointer"
                   draggable={true}
                   onDragStart={(e) => dragStart(e, index)}
+                  onClick={(e) =>
+                    setCaretToEnd(
+                      e.currentTarget.querySelector(
+                        'div[contenteditable="true"]'
+                      )
+                    )
+                  }
                 >
-                  <div className="h-3/6 flex flex-col justify-center border-r-2 border-solid border-blue-200 ">
+                  <div className="h-3/6 flex flex-col justify-center border-r-2 border-solid border-blue-200">
                     <MdOutlineDragIndicator
                       size={35}
                       className="h-10/12 pr-1 w-auto text-slate-400"
@@ -439,12 +485,12 @@ const Test = ({ className }: Props) => {
                     id={`idea-${index}`}
                     contentEditable
                     role="textbox"
-                    className="px-1 mx-3 w-full h-[20px] text-white focus:outline-none text-2xl flex flex-row justify-start items-center whitespace-normal bg-transparent"
+                    className="px-1 mx-3 w-full h-[20px] text-white focus:outline-none text-2xl flex flex-row justify-start items-center bg-transparent whitespace-nowrap"
                     onInput={async (e) => await handleOnInput(e, index)}
                     onKeyDown={async (e) => await handleKeyDown(e, index)}
                   >
                     {choices[index]}
-                    {connectionList[index] !== null ? (
+                    {connectionList[index] !== -1 ? (
                       <span
                         id={`main-span-${index}`}
                         className="highlight rounded-md px-2 ml-1"

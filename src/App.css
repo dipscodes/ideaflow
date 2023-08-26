@@ -26,8 +26,10 @@
 }
 
 .highlight {
-  background-color: gray;
+  /* background-color: gray; */
   /* border-radius: 0.3rem; */
+  --tw-text-opacity: 1;
+  color: rgb(8 145 178 / var(--tw-text-opacity));
 }
 
 .highlight-less {
