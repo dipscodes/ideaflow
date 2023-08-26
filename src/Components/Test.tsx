@@ -47,16 +47,19 @@ const Test = ({ className }: Props) => {
     array: string[],
     sourceIndex: number,
     destinationIndex: number
-  ): string[] => {
-    var copyList = [...array];
-    var removedElement = copyList.splice(sourceIndex, 1)[0];
+  ): [string, number][] => {
+    let copyList: [string, number][] = [];
+    for (let i = 0; i < array.length; i++) {
+      copyList.push([array[i], i]);
+    }
+    const removedElement = copyList.splice(sourceIndex, 1)[0];
     copyList.push(removedElement);
     let dIndex = destinationIndex;
     sourceIndex > destinationIndex
       ? (dIndex = destinationIndex + 1)
       : (dIndex = destinationIndex);
     if (dIndex >= copyList.length) dIndex = copyList.length - 1;
-    copyList.splice(dIndex, 0, copyList.pop() as string);
+    copyList.splice(dIndex, 0, copyList.pop() as [string, number]);
     return copyList;
   };
 
@@ -135,9 +138,21 @@ const Test = ({ className }: Props) => {
       parseInt(e.dataTransfer.getData("index")),
       index
     );
-    setChoices(tempChoices);
-    setConnectionList(tempConnections);
-    saveChoices(tempChoices);
+    const extractedChoices = tempChoices.map((value) => value[0]);
+    const a = tempChoices.map((value) => value[1]);
+    let b: number[] = [];
+    for (let i = 0; i < a.length; i++) {
+      b[a[i]] = i;
+    }
+    const extractedConnections = tempConnections.map((value: number) => {
+      if (value === -1) return value;
+      return b[value];
+    });
+
+    console.log(b);
+    setChoices(extractedChoices);
+    setConnectionList(extractedConnections);
+    saveChoices(extractedChoices);
     saveConnectionList(tempConnections);
     setToggle((prev) => (prev + 1) % 2);
   };
@@ -418,7 +433,7 @@ const Test = ({ className }: Props) => {
         e.target.value !== ""
       ) {
         inputElement[i].removeAttribute("hidden");
-        console.log(singleDiv?.innerHTML.replace(/<span.*?<\/span>/, ""));
+        // console.log(singleDiv?.innerHTML.replace(/<span.*?<\/span>/, ""));
       } else {
         inputElement[i].setAttribute("hidden", "hidden");
       }
