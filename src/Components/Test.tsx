@@ -190,7 +190,7 @@ const Test = ({ className }: Props) => {
       });
     setChoices(tempChoices);
     setConnectionList(tempConnections);
-    console.log(tempConnections);
+    // console.log(tempConnections);
     // console.log(choices, connectionList);
     // setAutofocusIndex(index === 0 ? index : index - 1);
     saveChoices(tempChoices);
@@ -215,7 +215,7 @@ const Test = ({ className }: Props) => {
           value !== -1 && value > index + 1 ? value + 1 : value
         );
       // tempConnections = tempConnections.concat(-1, secondConnectionPart);
-      console.log(tempConnections);
+      // console.log(tempConnections);
     } else {
       tempChoices = [...choices, choices[index]];
       tempConnections = [...connectionList, -1];
@@ -513,7 +513,7 @@ const Test = ({ className }: Props) => {
         >
           <div
             id="idea-dropdown"
-            className="absolute w-auto h-auto bg-white rounded-md px-4 py-3 hidden-scrollbar "
+            className="absolute w-auto h-auto bg-white rounded-md px-1 py-1 hidden-scrollbar"
             style={{ top: "-2000px", left: "-2000px" }}
           ></div>
           <div
