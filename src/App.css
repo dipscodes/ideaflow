@@ -30,6 +30,10 @@
   /* border-radius: 0.3rem; */
 }
 
+.idea-selecor {
+  @apply mt-1 cursor-pointer w-full border-b-2 border-solid border-slate-400 bg-slate-400;
+}
+
 .input-div {
   @apply px-1 mx-3 w-full h-auto text-white focus:outline-none text-3xl flex flex-col justify-normal items-start whitespace-normal;
 }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { HiOutlineLightBulb, HiOutlineDuplicate } from "react-icons/hi";
 import { MdOutlineDragIndicator } from "react-icons/md";
@@ -11,22 +11,14 @@ interface Props {
 
 const Test = ({ className }: Props) => {
   const [choices, setChoices] = useState<string[]>([]);
-  const [inputString, setInputString] = useState<string>("");
   const [autofocusIndex, setAutofocusIndex] = useState<number>(0);
   const [connectionList, setConnectionList] = useState<(number | null)[]>([]);
-  interface TProps {
-    questionStatement: string | null;
-    choices: string[];
-    categories: string[];
-    answer: object;
-  }
-  const templateQuestion: TProps = {
-    questionStatement: null,
-    choices: [],
-    categories: [],
-    answer: {},
-  };
-  const [question, setQuestion] = useState(templateQuestion);
+  const inputIndex = useRef(-1);
+
+  useEffect(() => {
+    console.log(choices);
+  }, [choices]);
+
   const [toggle, setToggle] = useState(0);
 
   const moveElementIndexToIndex = (
@@ -45,6 +37,7 @@ const Test = ({ className }: Props) => {
     copyList.splice(dIndex, 0, copyList.pop() as string);
     return copyList;
   };
+
   const moveConnectionsIndexToIndex = (
     array: (number | null)[],
     sourceIndex: number,
@@ -144,7 +137,7 @@ const Test = ({ className }: Props) => {
   const closeOption = (index: number) => {
     setChoices(choices.filter((item, i) => i !== index));
     setConnectionList(connectionList.filter((item, i) => i !== index));
-    console.log(choices, connectionList);
+    // console.log(choices, connectionList);
     setAutofocusIndex(index === 0 ? index : index - 1);
     setToggle((prev) => (prev + 1) % 2);
   };
@@ -157,7 +150,7 @@ const Test = ({ className }: Props) => {
       choices.push("");
       connectionList.push(null);
     }
-    console.log(choices, connectionList);
+    // console.log(choices, connectionList);
     setChoices(choices);
     setAutofocusIndex(index + 1);
     setTimeout(() => {
@@ -174,18 +167,24 @@ const Test = ({ className }: Props) => {
       `idea-${index}`
     ) as HTMLDivElement;
     const tempChoice = choices;
+    inputIndex.current = index; // ref update
+
     if (inputElement) {
       const inputText = inputElement.innerText;
       const marker = "<>";
       const startIndex = inputText.indexOf(marker);
-      tempChoice[index] = inputText
-        .replace("/^[a-zA-Z0-9<> ]*$/", "")
-        .replace(/\n/g, "");
+
+      const dropdown: HTMLDivElement = document.getElementById(
+        "idea-dropdown"
+      ) as HTMLDivElement;
+      dropdown.style.top = `-2000px`;
+      dropdown.style.left = `-2000px`;
+
       if (startIndex !== -1 && tempChoice.length > 1) {
-        tempChoice[index] = inputText
+        tempChoice[index] = `${inputText
           .substring(0, startIndex)
           .replace("/^[a-zA-Z0-9<> ]*$/", "")
-          .replace(/\n/g, "");
+          .replace(/\n/g, "")}`;
         const highlightedText = inputText.substring(startIndex + marker.length);
         const formattedText = `${inputText.substring(
           0,
@@ -204,13 +203,30 @@ const Test = ({ className }: Props) => {
         ) as HTMLDivElement;
         textWidthPlaceholder.textContent = inputElement.innerText;
         const textWidth: number = textWidthPlaceholder.offsetWidth;
+
+        // const tempDiv = document.createElement("div");
+        dropdown.innerHTML = "";
+
+        tempChoice.forEach((element: string, i: number) => {
+          if (i !== index) {
+            const tempElement = document.createElement("div");
+            tempElement.classList.add("idea-selector");
+            tempElement.id = `index-${i}`;
+            tempElement.innerText = element;
+            dropdown.append(tempElement);
+          }
+        });
+
         dropdown.style.top = `${inputElement.getClientRects()["0"].top + 30}px`;
         dropdown.style.left = `${
           textWidth + inputElement.getClientRects()["0"].left - 10
         }px`;
-        setCaretToEnd(inputElement);
       }
+      tempChoice[index] = inputText
+        .replace("/^[a-zA-Z0-9<> ]*$/", "")
+        .replace(/\n/g, "");
       setChoices(tempChoice);
+      setCaretToEnd(inputElement);
     }
   };
 
@@ -244,6 +260,7 @@ const Test = ({ className }: Props) => {
   };
 
   const handleKeyDown = async (event: any, index: number) => {
+    inputIndex.current = index;
     if (event.key === "Enter") {
       setChoices(choices.map((value) => value.replace(/\n/g, "")));
       await addOption();
@@ -273,33 +290,15 @@ const Test = ({ className }: Props) => {
         This is sample text
       </div>
       <div
-        id="idea-dropdown"
-        className="absolute w-auto h-auto bg-white rounded-md px-4 py-3"
-        style={{ top: "-2000px", left: "-2000px" }}
-      >
-        {choices.map((idea, index) => {
-          if (idea === inputString) return null;
-          return (
-            <div key={index}>
-              <div
-                className="mt-1 cursor-pointer w-full min-w-[50px] border-b-2 border-solid border-slate-400"
-                onClick={() => selectIdea(index)}
-              >
-                {idea}
-              </div>
-              <div className="w-auto border-b-2 border-solid border-slate-400"></div>
-            </div>
-          );
-        })}
-      </div>
-      <div
         id="cat-q"
         className="flex flex-row w-full justify-center items-center"
       >
         <div className="text-blue-200 mr-5">
           <HiOutlineLightBulb
             size={37}
-            onClick={() => console.log(choices, connectionList)}
+            onClick={() =>
+              console.log(choices, connectionList, inputIndex.current)
+            }
           />
         </div>
         <input
@@ -320,6 +319,11 @@ const Test = ({ className }: Props) => {
           key={toggle}
           className="w-full h-auto flex flex-col-reverse justify-start items-start"
         >
+          <div
+            id="idea-dropdown"
+            className="absolute w-auto h-auto bg-white rounded-md px-4 py-3"
+            style={{ top: "-2000px", left: "-2000px" }}
+          ></div>
           <div
             id={`empty-0`}
             className="w-full item outsight"
@@ -358,7 +362,7 @@ const Test = ({ className }: Props) => {
                     role="textbox"
                     className="px-1 mx-3 w-full h-[20px] text-white focus:outline-none text-2xl flex flex-row justify-start items-center whitespace-normal bg-transparent"
                     onInput={async (e) => await handleOnInput(e, index)}
-                    onKeyUp={async (e) => await handleKeyDown(e, index)}
+                    onKeyDown={async (e) => await handleKeyDown(e, index)}
                   >
                     {choices[index]}
                     {connectionList[index] !== null ? (
