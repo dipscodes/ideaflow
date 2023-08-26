@@ -16,7 +16,7 @@ const Test = ({ className }: Props) => {
   const inputIndex = useRef(-1);
 
   useEffect(() => {
-    console.log(choices);
+    // console.log(choices);
   }, [choices]);
 
   const [toggle, setToggle] = useState(0);
@@ -162,6 +162,36 @@ const Test = ({ className }: Props) => {
     setToggle((prev) => (prev + 1) % 2);
   };
 
+  const selectIdea = (index: number) => {
+    const inputElement = document.getElementById(
+      `idea-${autofocusIndex}`
+    ) as HTMLDivElement;
+    if (inputElement) {
+      const inputText = inputElement.innerText;
+      const marker = "<>";
+      const startIndex = inputText.indexOf(marker);
+      const formattedText = `${inputText.substring(
+        0,
+        startIndex
+      )}<span class="highlight rounded-md px-2 ml-1"><>${choices[index].replace(
+        "/^[a-zA-Z0-9<> ]*$/",
+        ""
+      )}</span>`;
+      inputElement.innerHTML = formattedText;
+      connectionList[autofocusIndex] = index;
+      const textWidthPlaceholder: HTMLDivElement = document.getElementById(
+        "textWidthPlaceholder"
+      ) as HTMLDivElement;
+      const dropdown: HTMLDivElement = document.getElementById(
+        "idea-dropdown"
+      ) as HTMLDivElement;
+      textWidthPlaceholder.textContent = inputElement.innerText;
+      dropdown.style.top = `-2000px`;
+      dropdown.style.left = `-2000px`;
+      setCaretToEnd(inputElement);
+    }
+  };
+
   const handleOnInput = async (e: any, index: number) => {
     const inputElement = document.getElementById(
       `idea-${index}`
@@ -205,6 +235,8 @@ const Test = ({ className }: Props) => {
         const textWidth: number = textWidthPlaceholder.offsetWidth;
 
         dropdown.innerHTML = "";
+        dropdown.style.maxHeight = "200px";
+        dropdown.style.overflowY = "scroll";
 
         tempChoice.forEach((element: string, i: number) => {
           if (i !== index) {
@@ -236,40 +268,18 @@ const Test = ({ className }: Props) => {
     }
   };
 
-  const selectIdea = (index: number) => {
-    const inputElement = document.getElementById(
-      `idea-${autofocusIndex}`
-    ) as HTMLDivElement;
-    if (inputElement) {
-      const inputText = inputElement.innerText;
-      const marker = "<>";
-      const startIndex = inputText.indexOf(marker);
-      const formattedText = `${inputText.substring(
-        0,
-        startIndex
-      )}<span class="highlight rounded-md px-2 ml-1"><>${choices[index].replace(
-        "/^[a-zA-Z0-9<> ]*$/",
-        ""
-      )}</span>`;
-      inputElement.innerHTML = formattedText;
-      connectionList[autofocusIndex] = index;
-      const textWidthPlaceholder: HTMLDivElement = document.getElementById(
-        "textWidthPlaceholder"
-      ) as HTMLDivElement;
-      const dropdown: HTMLDivElement = document.getElementById(
-        "idea-dropdown"
-      ) as HTMLDivElement;
-      textWidthPlaceholder.textContent = inputElement.innerText;
-      dropdown.style.top = `-2000px`;
-      dropdown.style.left = `-2000px`;
-    }
-  };
-
   const handleKeyDown = async (event: any, index: number) => {
-    inputIndex.current = index;
     if (event.key === "Enter") {
-      setChoices(choices.map((value) => value.replace(/\n/g, "")));
-      await addOption();
+      event.preventDefault();
+      const inputElement = document.getElementById(
+        `idea-${index}`
+      ) as HTMLDivElement;
+      if (inputElement && inputElement.innerText.includes("<>")) {
+        selectIdea(0);
+      } else await addOption();
+    }
+    if (event.key === "Backspace") {
+      event.preventDefault();
     }
   };
 
@@ -325,7 +335,7 @@ const Test = ({ className }: Props) => {
         >
           <div
             id="idea-dropdown"
-            className="absolute w-auto h-auto bg-white rounded-md px-4 py-3"
+            className="absolute w-auto h-auto bg-white rounded-md px-4 py-3 hidden-scrollbar "
             style={{ top: "-2000px", left: "-2000px" }}
           ></div>
           <div
