@@ -138,6 +138,10 @@ const Test = ({ className }: Props) => {
       parseInt(e.dataTransfer.getData("index")),
       index
     );
+
+    /**
+     * shuffling happens here
+     */
     const extractedChoices = tempChoices.map((value) => value[0]);
     const a = tempChoices.map((value) => value[1]);
     let b: number[] = [];
@@ -149,11 +153,10 @@ const Test = ({ className }: Props) => {
       return b[value];
     });
 
-    console.log(b);
     setChoices(extractedChoices);
     setConnectionList(extractedConnections);
     saveChoices(extractedChoices);
-    saveConnectionList(tempConnections);
+    saveConnectionList(extractedConnections);
     setToggle((prev) => (prev + 1) % 2);
   };
 
