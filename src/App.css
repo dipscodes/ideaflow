@@ -31,6 +31,17 @@
 }
 
 .idea-selecor {
+  margin-top: 0.25rem /* 4px */;
+  cursor: pointer;
+  width: 100%;
+  border-bottom-width: 2px;
+  border-style: solid;
+  --tw-border-opacity: 1;
+  border-color: rgb(148 163 184 / var(--tw-border-opacity));
+  --tw-bg-opacity: 1;
+  background-color: rgb(148 163 184 / var(--tw-bg-opacity));
+}
+.idea-selecor {
   @apply mt-1 cursor-pointer w-full border-b-2 border-solid border-slate-400 bg-slate-400;
 }
 

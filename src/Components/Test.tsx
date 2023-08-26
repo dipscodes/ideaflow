@@ -179,6 +179,9 @@ const Test = ({ className }: Props) => {
       ) as HTMLDivElement;
       dropdown.style.top = `-2000px`;
       dropdown.style.left = `-2000px`;
+      tempChoice[index] = inputText
+        .replace("/^[a-zA-Z0-9<> ]*$/", "")
+        .replace(/\n/g, "");
 
       if (startIndex !== -1 && tempChoice.length > 1) {
         tempChoice[index] = `${inputText
@@ -198,13 +201,9 @@ const Test = ({ className }: Props) => {
         const textWidthPlaceholder: HTMLDivElement = document.getElementById(
           "textWidthPlaceholder"
         ) as HTMLDivElement;
-        const dropdown: HTMLDivElement = document.getElementById(
-          "idea-dropdown"
-        ) as HTMLDivElement;
         textWidthPlaceholder.textContent = inputElement.innerText;
         const textWidth: number = textWidthPlaceholder.offsetWidth;
 
-        // const tempDiv = document.createElement("div");
         dropdown.innerHTML = "";
 
         tempChoice.forEach((element: string, i: number) => {
@@ -213,6 +212,16 @@ const Test = ({ className }: Props) => {
             tempElement.classList.add("idea-selector");
             tempElement.id = `index-${i}`;
             tempElement.innerText = element;
+            tempElement.style.marginTop = "0.25rem";
+            tempElement.style.cursor = "pointer";
+            tempElement.style.width = "100%";
+            tempElement.style.borderBottomWidth = "1px";
+            tempElement.style.borderStyle = "solid";
+            tempElement.style.borderColor = "rgb(148 163 184 / 1))";
+            tempElement.style.minWidth = "50px";
+            tempElement.addEventListener("click", () => {
+              selectIdea(i);
+            });
             dropdown.append(tempElement);
           }
         });
@@ -222,9 +231,6 @@ const Test = ({ className }: Props) => {
           textWidth + inputElement.getClientRects()["0"].left - 10
         }px`;
       }
-      tempChoice[index] = inputText
-        .replace("/^[a-zA-Z0-9<> ]*$/", "")
-        .replace(/\n/g, "");
       setChoices(tempChoice);
       setCaretToEnd(inputElement);
     }
@@ -296,9 +302,7 @@ const Test = ({ className }: Props) => {
         <div className="text-blue-200 mr-5">
           <HiOutlineLightBulb
             size={37}
-            onClick={() =>
-              console.log(choices, connectionList, inputIndex.current)
-            }
+            onClick={() => console.log(choices, connectionList)}
           />
         </div>
         <input
