@@ -1,10 +1,9 @@
-// import FormBuilder from "./FormBuilder";
-import FormBuilderTest from "./FormBuilderTest";
+import FormBuilder from "./FormBuilder";
 
 const Display = () => {
   return (
     <div className="w-full h-full bg-slate-600">
-      <FormBuilderTest />
+      <FormBuilder />
     </div>
   );
 };
