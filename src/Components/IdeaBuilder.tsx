@@ -3,6 +3,20 @@ import { AiOutlinePlusCircle } from "react-icons/ai";
 import { HiOutlineLightBulb, HiOutlineDuplicate } from "react-icons/hi";
 import { MdOutlineDragIndicator } from "react-icons/md";
 import { RxCrossCircled } from "react-icons/rx";
+import {
+  saveChoices,
+  saveConnectionList,
+  moveElementIndexToIndex,
+  moveConnectionsIndexToIndex,
+  moveStringsToStart,
+  setCaretToEnd,
+  dragStart,
+  dragEnter,
+  dragLeave,
+  dragOver,
+  // dragDrop,
+  seachIdeas,
+} from "../handlers";
 
 interface Props {
   className?: string;
@@ -25,99 +39,6 @@ const IdeaBuilder = ({ className }: Props) => {
         JSON.parse(localStorage.getItem("connections") as string)
       );
   }, []);
-
-  const saveChoices = (strings?: string[]) => {
-    if (strings) localStorage.setItem("choices", JSON.stringify(strings));
-    else localStorage.setItem("choices", JSON.stringify(choices));
-  };
-
-  const saveConnectionList = (numbers?: number[]) => {
-    if (numbers) localStorage.setItem("connections", JSON.stringify(numbers));
-    else localStorage.setItem("connections", JSON.stringify(connectionList));
-  };
-
-  const moveElementIndexToIndex = (
-    array: string[],
-    sourceIndex: number,
-    destinationIndex: number
-  ): [string, number][] => {
-    let copyList: [string, number][] = [];
-    for (let i = 0; i < array.length; i++) {
-      copyList.push([array[i], i]);
-    }
-    const removedElement = copyList.splice(sourceIndex, 1)[0];
-    copyList.push(removedElement);
-    let dIndex = destinationIndex;
-    sourceIndex > destinationIndex
-      ? (dIndex = destinationIndex + 1)
-      : (dIndex = destinationIndex);
-    if (dIndex >= copyList.length) dIndex = copyList.length - 1;
-    copyList.splice(dIndex, 0, copyList.pop() as [string, number]);
-    return copyList;
-  };
-
-  const moveConnectionsIndexToIndex = (
-    array: number[],
-    sourceIndex: number,
-    destinationIndex: number
-  ): number[] => {
-    var copyList = [...array];
-    var removedElement = copyList.splice(sourceIndex, 1)[0];
-    copyList.push(removedElement);
-    let dIndex = destinationIndex;
-    sourceIndex > destinationIndex
-      ? (dIndex = destinationIndex + 1)
-      : (dIndex = destinationIndex);
-    if (dIndex >= copyList.length) dIndex = copyList.length - 1;
-    copyList.splice(dIndex, 0, copyList.pop() as number);
-    return copyList;
-  };
-
-  const dragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-
-    const conditionOne =
-      `empty-${parseInt(e.dataTransfer.getData("index")) + 1}` ===
-      (e.target as HTMLDivElement).id;
-    const conditionTwo =
-      `empty-${e.dataTransfer.getData("index")}` ===
-      (e.target as HTMLDivElement).id;
-    if (!(conditionOne || conditionTwo))
-      (e.target as HTMLDivElement).classList.replace("outsight", "insight");
-  };
-
-  const dragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const conditionOne =
-      `empty-${parseInt(e.dataTransfer.getData("index")) + 1}` ===
-      (e.target as HTMLDivElement).id;
-    const conditionTwo =
-      `empty-${e.dataTransfer.getData("index")}` ===
-      (e.target as HTMLDivElement).id;
-    if (!(conditionOne || conditionTwo)) {
-      (e.target as HTMLDivElement).classList.replace("insight", "outsight");
-    }
-  };
-
-  const dragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "none";
-    if (
-      !(
-        `empty-${parseInt(e.dataTransfer.getData("index")) + 1}` ===
-          (e.target as HTMLDivElement).id ||
-        `empty-${e.dataTransfer.getData("index")}` ===
-          (e.target as HTMLDivElement).id
-      )
-    ) {
-      e.dataTransfer.dropEffect = "move";
-    }
-  };
-
-  const dragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
-    e.dataTransfer.setData("index", `${index}`);
-    e.dataTransfer.setData("enter", "false");
-  };
 
   const dragDrop = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     e.preventDefault();
@@ -244,26 +165,6 @@ const IdeaBuilder = ({ className }: Props) => {
       saveConnectionList(connectionList);
       setCaretToEnd(inputElement);
     }
-  };
-
-  const moveStringsToStart = (strs: string[], s1: string) => {
-    const matchingStrings: [string, number][] = [];
-    const semiMatchingStrings: [string, number][] = [];
-    const nonMatchingStrings: [string, number][] = [];
-
-    for (let i = 0; i < strs.length; i++) {
-      if (strs[i].startsWith(s1)) {
-        matchingStrings.push([strs[i], i]);
-      } else if (strs[i].includes(s1)) {
-        semiMatchingStrings.push([strs[i], i]);
-      } else {
-        nonMatchingStrings.push([strs[i], i]);
-      }
-    }
-
-    return matchingStrings
-      .concat(semiMatchingStrings)
-      .concat(nonMatchingStrings);
   };
 
   const handleOnInput = async (e: any, index: number) => {
@@ -402,43 +303,6 @@ const IdeaBuilder = ({ className }: Props) => {
         }
       }
     }
-  };
-
-  const seachIdeas = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputDivElements = document.getElementsByClassName(
-      "search-selection"
-    ) as HTMLCollectionOf<Element>;
-    if (inputDivElements) {
-      for (let i = 0; i < inputDivElements.length; i++) {
-        const singleDiv = inputDivElements[i].querySelector(
-          'div[contenteditable="true"]'
-        );
-        if (
-          singleDiv?.innerHTML
-            .replace(/<span.*?<\/span>/, "")
-            .includes(e.target.value) &&
-          e.target.value !== ""
-        ) {
-          inputDivElements[i].removeAttribute("hidden");
-        } else {
-          inputDivElements[i].setAttribute("hidden", "hidden");
-        }
-        if (e.target.value === "")
-          inputDivElements[i].removeAttribute("hidden");
-      }
-    }
-  };
-
-  const setCaretToEnd = (target: any) => {
-    const range = document.createRange();
-    const sel: any = window.getSelection();
-    range.selectNodeContents(target);
-    range.collapse(false);
-    sel.removeAllRanges();
-    sel.addRange(range);
-    target.focus();
-    range.detach();
-    target.scrollTop = target.scrollHeight;
   };
 
   return (
