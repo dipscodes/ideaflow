@@ -4,7 +4,7 @@ import { HiOutlineLightBulb, HiOutlineDuplicate } from "react-icons/hi";
 import { MdOutlineDragIndicator } from "react-icons/md";
 import { RxCrossCircled } from "react-icons/rx";
 import {
-  setCaretToEnd,
+  // setCaretToEnd,
   dragStart,
   dragEnter,
   dragLeave,
@@ -88,6 +88,26 @@ const IdeaBuilder = ({ className }: Props) => {
     setToggle((prev) => (prev + 1) % 2);
   };
 
+  const onIdeaInput = async (e: any, index: number) => {
+    const result = await handleOnInput(e, index, choices, connectionList);
+
+    if (result) {
+      setChoices(result[0]);
+    }
+  };
+
+  const setCaretToEnd = (target: HTMLDivElement) => {
+    const range = document.createRange();
+    const sel: any = window.getSelection();
+    range.selectNodeContents(target);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    target.focus();
+    range.detach();
+    target.scrollTop = target.scrollHeight;
+  };
+
   // const selectIdea = (index: number, focusIndex: number) => {
   //   const extractedConnections = handleSelectIdea(
   //     index,
@@ -98,20 +118,6 @@ const IdeaBuilder = ({ className }: Props) => {
 
   //   if (extractedConnections) setConnectionList(extractedConnections);
   // };
-
-  const onIdeaInput = async (e: any, index: number) => {
-    const result = await handleOnInput(e, index, choices, connectionList);
-    const inputElement = document.getElementById(
-      `idea-${index}`
-    ) as HTMLDivElement;
-
-    if (result) {
-      setChoices(result[0]);
-      setTimeout(() => {
-        setCaretToEnd(inputElement);
-      }, 50);
-    }
-  };
 
   // const handleKeyDown = async (event: any, index: number) => {
   //   if (event.key === "Space") {
@@ -253,7 +259,7 @@ const IdeaBuilder = ({ className }: Props) => {
                     setCaretToEnd(
                       e.currentTarget.querySelector(
                         'div[contenteditable="true"]'
-                      )
+                      ) as HTMLDivElement
                     );
                   }}
                 >
