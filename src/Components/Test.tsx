@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { HiOutlineLightBulb, HiOutlineDuplicate } from "react-icons/hi";
 import { MdOutlineDragIndicator } from "react-icons/md";
@@ -13,8 +12,6 @@ const Test = ({ className }: Props) => {
   const [choices, setChoices] = useState<string[]>([]);
   const [connectionList, setConnectionList] = useState<number[]>([]);
   const [toggle, setToggle] = useState(0);
-  // const [autofocusIndex, setAutofocusIndex] = useState<number>(0);
-  // const inputIndex = useRef(-1);
 
   useEffect(() => {
     // localStorage.removeItem("choices");
@@ -426,18 +423,6 @@ const Test = ({ className }: Props) => {
     }
   };
 
-  const setCaretToEnd = (target: any) => {
-    const range = document.createRange();
-    const sel: any = window.getSelection();
-    range.selectNodeContents(target);
-    range.collapse(false);
-    sel.removeAllRanges();
-    sel.addRange(range);
-    target.focus();
-    range.detach();
-    target.scrollTop = target.scrollHeight;
-  };
-
   const seachIdeas = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputDivElements = document.getElementsByClassName(
       "search-selection"
@@ -462,6 +447,18 @@ const Test = ({ className }: Props) => {
           inputDivElements[i].removeAttribute("hidden");
       }
     }
+  };
+
+  const setCaretToEnd = (target: any) => {
+    const range = document.createRange();
+    const sel: any = window.getSelection();
+    range.selectNodeContents(target);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    target.focus();
+    range.detach();
+    target.scrollTop = target.scrollHeight;
   };
 
   return (
@@ -544,7 +541,6 @@ const Test = ({ className }: Props) => {
                   draggable={true}
                   onDragStart={(e) => dragStart(e, index)}
                   onClick={(e) => {
-                    // setAutofocusIndex(index);
                     setCaretToEnd(
                       e.currentTarget.querySelector(
                         'div[contenteditable="true"]'
