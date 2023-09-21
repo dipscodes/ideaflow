@@ -4,7 +4,7 @@ import { HiOutlineLightBulb, HiOutlineDuplicate } from "react-icons/hi";
 import { MdOutlineDragIndicator } from "react-icons/md";
 import { RxCrossCircled } from "react-icons/rx";
 import {
-  // setCaretToEnd,
+  setCaretToEnd,
   dragStart,
   dragEnter,
   dragLeave,
@@ -16,6 +16,7 @@ import {
   handleCloseOption,
   // handleSelectIdea,
   handleOnInput,
+  saveChoices,
 } from "../handlers";
 
 interface Props {
@@ -28,8 +29,8 @@ const IdeaBuilder = ({ className }: Props) => {
   const [toggle, setToggle] = useState<number>(0);
 
   useEffect(() => {
-    localStorage.removeItem("choices");
-    localStorage.removeItem("connections");
+    // localStorage.removeItem("choices");
+    // localStorage.removeItem("connections");
     if (localStorage.getItem("choices") === null)
       localStorage.setItem("choices", JSON.stringify([]));
     else setChoices(JSON.parse(localStorage.getItem("choices") as string));
@@ -89,35 +90,19 @@ const IdeaBuilder = ({ className }: Props) => {
   };
 
   const onIdeaInput = async (e: any, index: number) => {
-    const result = await handleOnInput(e, index, choices, connectionList);
+    const result = handleOnInput(e, index, choices, connectionList);
 
     if (result) {
-      setChoices(result[0]);
+      saveChoices(result);
+      setChoices(result);
+
+      setTimeout(() => {
+        setCaretToEnd(
+          document.getElementById(`idea-${index}`) as HTMLDivElement
+        );
+      }, 10);
     }
   };
-
-  const setCaretToEnd = (target: HTMLDivElement) => {
-    const range = document.createRange();
-    const sel: any = window.getSelection();
-    range.selectNodeContents(target);
-    range.collapse(false);
-    sel.removeAllRanges();
-    sel.addRange(range);
-    target.focus();
-    range.detach();
-    target.scrollTop = target.scrollHeight;
-  };
-
-  // const selectIdea = (index: number, focusIndex: number) => {
-  //   const extractedConnections = handleSelectIdea(
-  //     index,
-  //     focusIndex,
-  //     choices,
-  //     connectionList
-  //   );
-
-  //   if (extractedConnections) setConnectionList(extractedConnections);
-  // };
 
   // const handleKeyDown = async (event: any, index: number) => {
   //   if (event.key === "Space") {

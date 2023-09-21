@@ -252,12 +252,12 @@ const moveStringsToStart = (strs: string[], s1: string) => {
   return matchingStrings.concat(semiMatchingStrings).concat(nonMatchingStrings);
 };
 
-const handleOnInput = async (
+const handleOnInput = (
   e: any,
   index: number,
   choices: string[],
   connectionList: number[]
-): Promise<[string[], HTMLDivElement] | null> => {
+): string[] | null => {
   const inputElement = document.getElementById(
     `idea-${index}`
   ) as HTMLDivElement;
@@ -339,9 +339,9 @@ const handleOnInput = async (
         textWidth + inputElement.getClientRects()["0"].left - 10
       }px`;
     }
-    saveChoices(tempChoice);
+    // saveChoices(tempChoice);
     // setCaretToEnd(inputElement);
-    return [tempChoice, inputElement];
+    return tempChoice;
   }
   return null;
 };
@@ -377,8 +377,8 @@ const handleOnInput = async (
 //       if (firshChild) {
 //         tempIndex = parseInt(firshChild.id.split("-")[2]);
 //       }
-//       selectIdea(tempIndex, index, choices, connectionList);
-//     } else await addOption(choices, connectionList);
+//       handleSelectIdea(tempIndex, index, choices, connectionList);
+//     } else await handleAddOption(choices, connectionList);
 //   }
 
 //   if (event.key === "Backspace") {
@@ -436,7 +436,7 @@ const handleSearchIdeas = (e: React.ChangeEvent<HTMLInputElement>) => {
   }
 };
 
-const setCaretToEnd = (target: any) => {
+const setCaretToEnd = (target: HTMLDivElement) => {
   const range = document.createRange();
   const sel: any = window.getSelection();
   range.selectNodeContents(target);
