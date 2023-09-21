@@ -29,8 +29,8 @@ const IdeaBuilder = ({ className }: Props) => {
   const [toggle, setToggle] = useState<number>(0);
 
   useEffect(() => {
-    localStorage.removeItem("choices");
-    localStorage.removeItem("connections");
+    // localStorage.removeItem("choices");
+    // localStorage.removeItem("connections");
     if (localStorage.getItem("choices") === null)
       localStorage.setItem("choices", JSON.stringify([]));
     else setChoices(JSON.parse(localStorage.getItem("choices") as string));
