@@ -14,9 +14,9 @@ import {
   handleDuplicateIdea,
   handleSearchIdeas,
   handleCloseOption,
-  // handleOnInput,
+  saveConnectionList,
   saveChoices,
-  handleKeyDown,
+  handleSelectIdea,
 } from "../handlers";
 
 interface Props {
@@ -89,20 +89,13 @@ const IdeaBuilder = ({ className }: Props) => {
     setToggle((prev) => (prev + 1) % 2);
   };
 
-  // const onIdeaInput = async (e: any, index: number) => {
-  //   const result = handleOnInput(e, index, choices, connectionList, setChoices);
-
-  //   if (result) {
-  //     // setChoices(result);
-  //     saveChoices(result);
-
-  //     setTimeout(() => {
-  //       setCaretToEnd(
-  //         document.getElementById(`idea-${index}`) as HTMLDivElement
-  //       );
-  //     }, 10);
-  //   }
-  // };
+  const selectIdea = (index: number, focusIndex: number) => {
+    const result = handleSelectIdea(index, focusIndex, choices, connectionList);
+    if (result) {
+      setConnectionList(result);
+      setToggle((prev) => (prev + 1) % 2);
+    }
+  };
 
   const handleIdeaOnInput = async (e: any, index: number) => {
     const moveStringsToStart = (strs: string[], s1: string) => {
@@ -187,7 +180,8 @@ const IdeaBuilder = ({ className }: Props) => {
             if (i === 0)
               tempElement.style.backgroundColor = "rgb(8 145 178 / 1)";
             tempElement.addEventListener("click", () => {
-              // selectIdea(element[1], index);
+              selectIdea(element[1], index);
+              setCaretToEnd(inputElement);
             });
             dropdown.append(tempElement);
           }
@@ -203,16 +197,66 @@ const IdeaBuilder = ({ className }: Props) => {
     }
   };
 
-  const onIdeaKeyDown = async (
-    e: any,
-    index: number,
-    choices: string[],
-    connectionList: number[]
-  ) => {
-    const result = await handleKeyDown(e, index, choices, connectionList);
-    if (result) {
-      if (result === true) await addOption();
-      if (Array.isArray(result)) setConnectionList(result);
+  const handleIdeaKeyDown = async (event: any, index: number) => {
+    if (event.key === "Space") {
+      event.preventDefault();
+      const inputElement = document.getElementById(
+        `idea-${index}`
+      ) as HTMLDivElement;
+      setCaretToEnd(inputElement);
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const inputElement = document.getElementById(
+        `idea-${index}`
+      ) as HTMLDivElement;
+      const dropDownElement = document.getElementById(
+        "idea-dropdown"
+      ) as HTMLDivElement;
+      const spanELement = document.getElementById(
+        `main-span-${index}`
+      ) as HTMLSpanElement;
+      if (inputElement && spanELement) {
+        let tempIndex = 0;
+        const firshChild = dropDownElement.firstElementChild;
+        if (firshChild) {
+          tempIndex = parseInt(firshChild.id.split("-")[2]);
+        }
+        selectIdea(tempIndex, index);
+        setTimeout(() => {
+          setCaretToEnd(
+            document.getElementById(`idea-${index}`) as HTMLDivElement
+          );
+        }, 10);
+      } else await addOption();
+    }
+
+    if (event.key === "Backspace") {
+      const inputElement = document.getElementById(
+        `idea-${index}`
+      ) as HTMLDivElement;
+      const spanELement = document.getElementById(
+        `main-span-${index}`
+      ) as HTMLSpanElement;
+      if (inputElement && spanELement) {
+        event.preventDefault();
+        if (spanELement.getAttribute("data-delete") === "true") {
+          inputElement.innerHTML = choices[index];
+          connectionList[index] = -1;
+          setConnectionList(connectionList);
+          setCaretToEnd(inputElement);
+          saveConnectionList(connectionList);
+          const dropdown: HTMLDivElement = document.getElementById(
+            "idea-dropdown"
+          ) as HTMLDivElement;
+          dropdown.style.top = `-2000px`;
+          dropdown.style.left = `-2000px`;
+        } else {
+          spanELement.setAttribute("data-delete", "true");
+          spanELement.style.backgroundColor = "gray ";
+        }
+      }
     }
   };
 
@@ -315,9 +359,7 @@ const IdeaBuilder = ({ className }: Props) => {
                     role="textbox"
                     className="px-1 mx-3 w-full h-[20px] text-white focus:outline-none text-2xl flex flex-row justify-start items-center bg-transparent whitespace-nowrap"
                     onInput={async (e) => await handleIdeaOnInput(e, index)}
-                    onKeyDown={async (e) =>
-                      await onIdeaKeyDown(e, index, choices, connectionList)
-                    }
+                    onKeyDown={async (e) => await handleIdeaKeyDown(e, index)}
                   >
                     {choices[index]}
                     {connectionList[index] !== -1 ? (

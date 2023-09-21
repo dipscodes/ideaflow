@@ -227,7 +227,6 @@ const handleSelectIdea = (
     dropdown.style.left = `-2000px`;
     saveChoices(tempChoices);
     saveConnectionList(tempConnections);
-    setCaretToEnd(inputElement);
 
     return tempConnections;
   }
@@ -402,6 +401,7 @@ const handleKeyDown = async (
     ) as HTMLSpanElement;
     if (inputElement && spanELement) {
       event.preventDefault();
+      console.log("backspaced");
       if (spanELement.getAttribute("data-delete") === "true") {
         const tempChoices = [...choices];
         const tempConnections = [...connectionList];
