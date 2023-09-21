@@ -14,9 +14,9 @@ import {
   handleDuplicateIdea,
   handleSearchIdeas,
   handleCloseOption,
-  // handleSelectIdea,
   handleOnInput,
   saveChoices,
+  handleKeyDown,
 } from "../handlers";
 
 interface Props {
@@ -104,63 +104,18 @@ const IdeaBuilder = ({ className }: Props) => {
     }
   };
 
-  // const handleKeyDown = async (event: any, index: number) => {
-  //   if (event.key === "Space") {
-  //     event.preventDefault();
-  //     const inputElement = document.getElementById(
-  //       `idea-${index}`
-  //     ) as HTMLDivElement;
-  //     setCaretToEnd(inputElement);
-  //   }
-
-  //   if (event.key === "Enter") {
-  //     event.preventDefault();
-  //     const inputElement = document.getElementById(
-  //       `idea-${index}`
-  //     ) as HTMLDivElement;
-  //     const dropDownElement = document.getElementById(
-  //       "idea-dropdown"
-  //     ) as HTMLDivElement;
-  //     const spanELement = document.getElementById(
-  //       `main-span-${index}`
-  //     ) as HTMLSpanElement;
-  //     if (inputElement && spanELement) {
-  //       let tempIndex = 0;
-  //       const firshChild = dropDownElement.firstElementChild;
-  //       if (firshChild) {
-  //         tempIndex = parseInt(firshChild.id.split("-")[2]);
-  //       }
-  //       selectIdea(tempIndex, index);
-  //     } else await addOption();
-  //   }
-
-  //   if (event.key === "Backspace") {
-  //     const inputElement = document.getElementById(
-  //       `idea-${index}`
-  //     ) as HTMLDivElement;
-  //     const spanELement = document.getElementById(
-  //       `main-span-${index}`
-  //     ) as HTMLSpanElement;
-  //     if (inputElement && spanELement) {
-  //       event.preventDefault();
-  //       if (spanELement.getAttribute("data-delete") === "true") {
-  //         inputElement.innerHTML = choices[index];
-  //         connectionList[index] = -1;
-  //         setConnectionList(connectionList);
-  //         setCaretToEnd(inputElement);
-  //         saveConnectionList(connectionList);
-  //         const dropdown: HTMLDivElement = document.getElementById(
-  //           "idea-dropdown"
-  //         ) as HTMLDivElement;
-  //         dropdown.style.top = `-2000px`;
-  //         dropdown.style.left = `-2000px`;
-  //       } else {
-  //         spanELement.setAttribute("data-delete", "true");
-  //         spanELement.style.backgroundColor = "gray ";
-  //       }
-  //     }
-  //   }
-  // };
+  const onIdeaKeyDown = async (
+    e: any,
+    index: number,
+    choices: string[],
+    connectionList: number[]
+  ) => {
+    const result = await handleKeyDown(e, index, choices, connectionList);
+    if (result) {
+      if (result === true) await addOption();
+      if (Array.isArray(result)) setConnectionList(result);
+    }
+  };
 
   return (
     <div
@@ -261,7 +216,9 @@ const IdeaBuilder = ({ className }: Props) => {
                     role="textbox"
                     className="px-1 mx-3 w-full h-[20px] text-white focus:outline-none text-2xl flex flex-row justify-start items-center bg-transparent whitespace-nowrap"
                     onInput={async (e) => await onIdeaInput(e, index)}
-                    // onKeyDown={async (e) => await handleKeyDown(e, index)}
+                    onKeyDown={async (e) =>
+                      await onIdeaKeyDown(e, index, choices, connectionList)
+                    }
                   >
                     {choices[index]}
                     {connectionList[index] !== -1 ? (

@@ -346,71 +346,76 @@ const handleOnInput = (
   return null;
 };
 
-// const handleKeyDown = async (
-//   event: any,
-//   index: number,
-//   choices: string[],
-//   connectionList: number[]
-// ) => {
-//   if (event.key === "Space") {
-//     event.preventDefault();
-//     const inputElement = document.getElementById(
-//       `idea-${index}`
-//     ) as HTMLDivElement;
-//     setCaretToEnd(inputElement);
-//   }
+const handleKeyDown = async (
+  event: any,
+  index: number,
+  choices: string[],
+  connectionList: number[]
+): Promise<boolean | number[] | null> => {
+  if (event.key === "Space") {
+    event.preventDefault();
+    const inputElement = document.getElementById(
+      `idea-${index}`
+    ) as HTMLDivElement;
+    setCaretToEnd(inputElement);
+    return null;
+  }
 
-//   if (event.key === "Enter") {
-//     event.preventDefault();
-//     const inputElement = document.getElementById(
-//       `idea-${index}`
-//     ) as HTMLDivElement;
-//     const dropDownElement = document.getElementById(
-//       "idea-dropdown"
-//     ) as HTMLDivElement;
-//     const spanELement = document.getElementById(
-//       `main-span-${index}`
-//     ) as HTMLSpanElement;
-//     if (inputElement && spanELement) {
-//       let tempIndex = 0;
-//       const firshChild = dropDownElement.firstElementChild;
-//       if (firshChild) {
-//         tempIndex = parseInt(firshChild.id.split("-")[2]);
-//       }
-//       handleSelectIdea(tempIndex, index, choices, connectionList);
-//     } else await handleAddOption(choices, connectionList);
-//   }
+  if (event.key === "Enter") {
+    event.preventDefault();
+    const inputElement = document.getElementById(
+      `idea-${index}`
+    ) as HTMLDivElement;
+    const dropDownElement = document.getElementById(
+      "idea-dropdown"
+    ) as HTMLDivElement;
+    const spanELement = document.getElementById(
+      `main-span-${index}`
+    ) as HTMLSpanElement;
+    if (inputElement && spanELement) {
+      let tempIndex = 0;
+      const firshChild = dropDownElement.firstElementChild;
+      if (firshChild) {
+        tempIndex = parseInt(firshChild.id.split("-")[2]);
+      }
+      handleSelectIdea(tempIndex, index, choices, connectionList);
+    } else {
+      await handleAddOption(choices, connectionList);
+      return true;
+    }
+  }
 
-//   if (event.key === "Backspace") {
-//     const inputElement = document.getElementById(
-//       `idea-${index}`
-//     ) as HTMLDivElement;
-//     const spanELement = document.getElementById(
-//       `main-span-${index}`
-//     ) as HTMLSpanElement;
-//     if (inputElement && spanELement) {
-//       event.preventDefault();
-//       if (spanELement.getAttribute("data-delete") === "true") {
-//         const tempChoices = [...choices];
-//         const tempConnections = [...connectionList];
-//         inputElement.innerHTML = tempChoices[index];
-//         tempConnections[index] = -1;
-//         // setConnectionList(tempConnections);
-//         setCaretToEnd(inputElement);
-//         saveConnectionList(tempConnections);
-//         const dropdown: HTMLDivElement = document.getElementById(
-//           "idea-dropdown"
-//         ) as HTMLDivElement;
-//         dropdown.style.top = `-2000px`;
-//         dropdown.style.left = `-2000px`;
-//         return tempConnections;
-//       } else {
-//         spanELement.setAttribute("data-delete", "true");
-//         spanELement.style.backgroundColor = "gray ";
-//       }
-//     }
-//   }
-// };
+  if (event.key === "Backspace") {
+    const inputElement = document.getElementById(
+      `idea-${index}`
+    ) as HTMLDivElement;
+    const spanELement = document.getElementById(
+      `main-span-${index}`
+    ) as HTMLSpanElement;
+    if (inputElement && spanELement) {
+      event.preventDefault();
+      if (spanELement.getAttribute("data-delete") === "true") {
+        const tempChoices = [...choices];
+        const tempConnections = [...connectionList];
+        inputElement.innerHTML = tempChoices[index];
+        tempConnections[index] = -1;
+        // setConnectionList(tempConnections);
+        setCaretToEnd(inputElement);
+        saveConnectionList(tempConnections);
+        const dropdown: HTMLDivElement = document.getElementById(
+          "idea-dropdown"
+        ) as HTMLDivElement;
+        dropdown.style.top = `-2000px`;
+        dropdown.style.left = `-2000px`;
+        return tempConnections;
+      } else {
+        spanELement.setAttribute("data-delete", "true");
+        spanELement.style.backgroundColor = "gray ";
+      }
+    }
+  }
+  return null;
+};
 
 const handleSearchIdeas = (e: React.ChangeEvent<HTMLInputElement>) => {
   const inputDivElements = document.getElementsByClassName(
@@ -466,4 +471,5 @@ export {
   handleSelectIdea,
   handleSearchIdeas,
   handleOnInput,
+  handleKeyDown,
 };
