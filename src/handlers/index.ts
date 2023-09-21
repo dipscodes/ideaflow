@@ -225,7 +225,7 @@ const handleSelectIdea = (
     textWidthPlaceholder.textContent = inputElement.innerText;
     dropdown.style.top = `-2000px`;
     dropdown.style.left = `-2000px`;
-    saveChoices();
+    saveChoices(tempChoices);
     saveConnectionList(tempConnections);
     setCaretToEnd(inputElement);
 
@@ -256,7 +256,8 @@ const handleOnInput = (
   e: any,
   index: number,
   choices: string[],
-  connectionList: number[]
+  connectionList: number[],
+  callback: any
 ): string[] | null => {
   const inputElement = document.getElementById(
     `idea-${index}`
@@ -291,10 +292,12 @@ const handleOnInput = (
       let formattedText = `${inputText.substring(
         0,
         startIndex
-      )}<span id="main-span-${index}" class="highlight rounded-md px-2 ml-1"><>${highlightedText.replace(
+      )}<span id="main-span-${index}" class="highlight rounded-md px-2 ml-1">${marker}${highlightedText.replace(
         / {2,}/g,
         ""
       )}</span>`;
+
+      console.log(formattedText);
 
       const shuffledTempChoice = moveStringsToStart(
         tempChoice,
@@ -339,8 +342,7 @@ const handleOnInput = (
         textWidth + inputElement.getClientRects()["0"].left - 10
       }px`;
     }
-    // saveChoices(tempChoice);
-    // setCaretToEnd(inputElement);
+    callback(tempChoice);
     return tempChoice;
   }
   return null;
@@ -378,7 +380,13 @@ const handleKeyDown = async (
       if (firshChild) {
         tempIndex = parseInt(firshChild.id.split("-")[2]);
       }
-      handleSelectIdea(tempIndex, index, choices, connectionList);
+      const result = handleSelectIdea(
+        tempIndex,
+        index,
+        choices,
+        connectionList
+      );
+      return result;
     } else {
       await handleAddOption(choices, connectionList);
       return true;
