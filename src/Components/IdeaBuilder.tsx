@@ -9,7 +9,7 @@ interface Props {
   className?: string;
 }
 
-const Test = ({ className }: Props) => {
+const IdeaBuilder = ({ className }: Props) => {
   const [choices, setChoices] = useState<string[]>([]);
   const [connectionList, setConnectionList] = useState<number[]>([]);
   const [toggle, setToggle] = useState(0);
@@ -607,8 +607,8 @@ const Test = ({ className }: Props) => {
   );
 };
 
-Test.defautlProps = {
+IdeaBuilder.defautlProps = {
   className: "",
 };
 
-export default Test;
+export default IdeaBuilder;
