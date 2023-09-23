@@ -253,8 +253,12 @@ const IdeaBuilder = ({ className }: Props) => {
           dropdown.style.top = `-2000px`;
           dropdown.style.left = `-2000px`;
         } else {
+          var range = document.createRange();
+          range.selectNodeContents(spanELement);
+          var selection = window.getSelection() as Selection;
+          selection.removeAllRanges();
+          selection.addRange(range);
           spanELement.setAttribute("data-delete", "true");
-          spanELement.style.backgroundColor = "gray ";
         }
       }
     }
