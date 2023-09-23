@@ -420,10 +420,18 @@ const Test = ({ className }: Props) => {
           dropdown.style.left = `-2000px`;
         } else {
           spanELement.setAttribute("data-delete", "true");
-          spanELement.style.backgroundColor = "gray ";
+          highlightElement(spanELement);
         }
       }
     }
+  };
+
+  const highlightElement = (node: Node) => {
+    var range = document.createRange();
+    range.selectNodeContents(node);
+    var selection = window.getSelection() as Selection;
+    selection.removeAllRanges();
+    selection.addRange(range);
   };
 
   const setCaretToEnd = (target: any) => {
