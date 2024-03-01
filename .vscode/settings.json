@@ -12,7 +12,7 @@
   "editor.fontSize": 16,
   "editor.tabSize": 2,
   "editor.wordWrap": "on",
-  "editor.fontFamily": "Fira Code",
+  "editor.fontFamily": "Fira Code, monospace",
   "editor.fontLigatures": true,
-  "terminal.integrated.fontFamily": "\"Fira Code\""
+  "terminal.integrated.fontFamily": "Fira Code, monospace"
 }
